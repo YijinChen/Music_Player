@@ -1,11 +1,13 @@
 //network relative code
 #include <stdio.h>
 #include <sys/socket.h>
+#include <netinet/in.h>     // For struct sockaddr_in
 #include "main.h"
 #include <pthread.h>
 #include "socket.h"
 #include <string.h>
 #include "device.h"
+
 extern int g_sockfd;
 
 void *connect_cb(void *arg){
