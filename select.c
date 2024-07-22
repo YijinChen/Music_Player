@@ -40,15 +40,22 @@ void m_select(){
         }
 
         if (FD_ISSET(g_sockfd, &tmpfd)){
-        //if data is sent by tcp
+            //if data is sent by tcp
 
         }
         else if (FD_ISSET(g_buttonfd, &tmpfd)){
-        //if data is sent by button
+            //if data is sent by button
 
         }
         else if(FD_ISSET(0, &tmpfd)){
-        //use for testing on PC, data is sent by standard input    
+            //use for testing on PC, data is sent by standard input   
+            int func;
+            scanf("%d", &func);
+
+            switch(func){
+                case 1: break;
+                case 2: break;
+            }
         }
 
     }

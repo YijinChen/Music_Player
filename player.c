@@ -4,6 +4,8 @@
 #include <dirent.h> // for opendir() and readdir()
 #include <stdlib.h> //for exit()
 #include "main.h"
+#include <string.h>
+
 extern Node *head;
 
 //judge if the file name is end with .mp3
@@ -36,9 +38,9 @@ void GetMusic(){
     }
 
     //read directory
-    struct dirent *file = readdir(dir);
-    while(file != NULL){
-        if(file->d_type != 10){ // if file is a normal file
+    struct dirent *file;
+    while((file = readdir(dir)) != NULL){
+        if(file->d_type != 8){ // if file is a normal file
             continue;
         }
 
@@ -46,7 +48,10 @@ void GetMusic(){
             continue;
         }
 
-        int ret = InsertLink(head, file->d_name);
+        printf("%s\n", file->d_name);
+
+        int ret;
+        ret = InsertLink(head, file->d_name);
         if (ret == FAILURE){
             printf("fail to insert music\n");
         }

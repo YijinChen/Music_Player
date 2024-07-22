@@ -1,6 +1,7 @@
 //network relative code
 #include <stdio.h>
 #include <sys/socket.h>
+#include <arpa/inet.h> //for inet_addr
 #include <netinet/in.h>     // For struct sockaddr_in
 #include "main.h"
 #include <pthread.h>

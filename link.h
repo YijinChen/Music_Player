@@ -8,5 +8,6 @@ struct Node{
 
 typedef struct Node Node;
 int InitLink();
+int InsertLink(Node *h, const char *name);
 
 #endif

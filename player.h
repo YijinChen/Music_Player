@@ -1,7 +1,8 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#define MUSICPATH "/Users/yijin/Documents/Cpp Projects/Music_Player/music_list"
+#define MUSICPATH "/home/ubuntu/playground/Music_Player/music_list"
+void GetMusic();
 
 #endif
 

@@ -1,5 +1,6 @@
 //control the hardware relative operation
 #include <fcntl.h>
+#include <sys/ioctl.h>
 #include "main.h"
 
 extern int g_buttonfd;

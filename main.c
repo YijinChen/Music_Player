@@ -1,7 +1,10 @@
 #include <stdio.h>
 #include "main.h"
 #include "device.h"
+#include "socket.h"
+#include "link.h"
 #include <stdlib.h> // for exit()
+#include "player.h"
 
 
 int g_buttonfd;
