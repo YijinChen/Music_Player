@@ -5,8 +5,24 @@
 #include <stdlib.h> //for exit()
 #include "main.h"
 #include <string.h>
+#include <sys/shm.h>
+#include <sys/ipc.h>
 
 extern Node *head;
+void *g_addr = NULL; //map address for shared memory 
+
+//initialize shared memory
+int InitShm(){
+    int shmid = shmget(SHMKEY, SHMSIZE, IPC_CREAT | IPC_EXCL);
+    if(shmid == -1){
+        return FAILURE;
+    }
+    //map
+    g_addr = shmat(shmid, NULL, 0);
+    if(g_addr == NULL){
+        return FAILURE;
+    }
+}
 
 //judge if the file name is end with .mp3
 int m_mp3_end(const char *name){
@@ -55,7 +71,9 @@ void GetMusic(){
         if (ret == FAILURE){
             printf("fail to insert music\n");
         }
-
     }
+}
+
+void start_play(){
 
 }

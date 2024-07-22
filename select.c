@@ -16,11 +16,11 @@ void show(){
     printf("6. next\n");
     printf("7. increase volume\n");
     printf("8. decrease volume\n");
-
 }
 
 
 void m_select(){
+    show();
     fd_set readfd, tmpfd;
     int maxfd = (g_buttonfd > g_sockfd) ? g_buttonfd : g_sockfd;
     int ret;
@@ -53,7 +53,9 @@ void m_select(){
             scanf("%d", &func);
 
             switch(func){
-                case 1: break;
+                case 1: 
+                start_play();
+                break;
                 case 2: break;
             }
         }

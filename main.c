@@ -36,6 +36,13 @@ int main(){
         exit(1);
     }
 
+    //Initialize shared memory
+    ret = InitShm();
+    if(ret == FAILURE){
+        print("fail to initialize shared memory\n");
+        exit(1);
+    }
+
     GetMusic();
     m_select();
 
