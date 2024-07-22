@@ -8,6 +8,7 @@ int g_buttonfd;
 int g_ledfd;
 int g_mixerfd; // control the voice volumn
 int g_sockfd;
+struct Node *head; //head for music list
 
 int main(){
     int ret;
@@ -24,6 +25,16 @@ int main(){
         led_on(0);
         led_on(1);
     }
+
+    //initialize music list
+    ret = InitLink();
+    if(ret == FAILURE){
+        printf("fail to initialize music list");
+        exit(1);
+    }
+
+    GetMusic();
+    m_select();
 
 
     return 0;

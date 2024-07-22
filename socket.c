@@ -6,6 +6,7 @@
 #include <pthread.h>
 #include "socket.h"
 #include <string.h>
+#include <unistd.h> // For sleep()
 #include "device.h"
 
 extern int g_sockfd;
@@ -22,6 +23,7 @@ void *connect_cb(void *arg){
         led_on(0);
         int ret = connect(g_sockfd, (struct sockaddr *) &server_addr, sizeof(server_addr));
         if (ret == -1){
+            sleep(5); // If fail to connect, sleep 5 seconds
             continue;
         }
         //when connection is successful, let all 4 leds shine
