@@ -35,6 +35,8 @@ void *connect_cb(void *arg){
 
         break;
     }
+
+    return NULL;
 }
 
 int InitSocket(){
@@ -50,4 +52,5 @@ int InitSocket(){
         return FAILURE;
     }
 
+    return SUCCESS;
 }

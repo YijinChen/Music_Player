@@ -7,11 +7,11 @@ extern int g_buttonfd;
 extern int g_ledfd;
 extern int g_mixerfd;
 
-int led_on(int which){
+void led_on(int which){
     ioctl(g_ledfd, 1, which);
 }
 
-int led_off(int which){
+void led_off(int which){
     ioctl(g_ledfd, 0, which);
 }
 

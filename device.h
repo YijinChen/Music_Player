@@ -2,7 +2,7 @@
 #define DEVICE_H
 
 int InitDriver();
-int led_on(int which);
-int led_off(int which);
+void led_on(int which);
+void led_off(int which);
 
 #endif

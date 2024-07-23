@@ -7,10 +7,10 @@
 #include "player.h"
 
 
-int g_buttonfd;
+int g_buttonfd = 3;
 int g_ledfd;
 int g_mixerfd; // control the voice volumn
-int g_sockfd;
+int g_sockfd = 3;
 struct Node *head; //head for music list
 
 int main(){

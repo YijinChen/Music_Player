@@ -10,7 +10,7 @@ extern int g_sockfd;
 void show(){
     printf("1. start\n");
     printf("2. stop\n");
-    printf("3. pause\n");
+    printf("3. suspend\n");
     printf("4. continue\n");
     printf("5. last\n");
     printf("6. next\n");
@@ -22,14 +22,15 @@ void show(){
 void m_select(){
     show();
     fd_set readfd, tmpfd;
-    int maxfd = (g_buttonfd > g_sockfd) ? g_buttonfd : g_sockfd;
+    //int maxfd = (g_buttonfd > g_sockfd) ? g_buttonfd : g_sockfd;
+    int maxfd = 2;
     int ret;
     
     FD_ZERO(&readfd);
     FD_ZERO(&tmpfd);
 
-    FD_SET(g_buttonfd, &readfd);
-    FD_SET(g_sockfd, &readfd);
+    //FD_SET(g_buttonfd, &readfd);
+    //FD_SET(g_sockfd, &readfd);
     FD_SET(0, &readfd);    // add standard input into readfd
 
     while(1){
