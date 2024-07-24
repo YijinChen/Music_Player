@@ -5,6 +5,7 @@
 #include "link.h"
 #include <stdlib.h> // for exit()
 #include "player.h"
+#include "select.h"
 
 
 int g_buttonfd = 3;
@@ -39,13 +40,12 @@ int main(){
     //Initialize shared memory
     ret = InitShm();
     if(ret == FAILURE){
-        print("fail to initialize shared memory\n");
+        printf("fail to initialize shared memory\n");
         exit(1);
     }
 
     GetMusic();
     m_select();
-
 
     return 0;
 }

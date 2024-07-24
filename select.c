@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <sys/select.h>
+#include "player.h"
 // #include <sys/types.h>  // For fd_set and other types
 // #include <sys/time.h>   // For struct timeval
 // #include <unistd.h>     // For close and other POSIX functions
@@ -54,10 +55,24 @@ void m_select(){
             scanf("%d", &func);
 
             switch(func){
-                case 1: 
+                case 1:  //start play
                 start_play();
                 break;
-                case 2: break;
+                case 2: //stop play
+                stop_play();
+                break;
+                case 3: //suspend
+                suspend_play();
+                break;
+                case 4: //continue
+                continue_play();
+                break;
+                case 5: //play last music
+                prior_play();
+                break;
+                case 6:
+                next_play();
+                break;
             }
         }
 

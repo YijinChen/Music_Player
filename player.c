@@ -9,6 +9,8 @@
 #include <sys/ipc.h>
 #include <unistd.h> //for fork()
 #include <sys/wait.h> //for wait()
+#include <errno.h>
+#include <signal.h> //for kill()
 
 extern Node *head;
 void *g_addr = NULL; //map address for shared memory 
@@ -17,21 +19,42 @@ int g_suspend_flag = 0; //if the player suspend
 
 //initialize shared memory
 int InitShm(){
-    int shmid = shmget(SHMKEY, SHMSIZE, IPC_CREAT | IPC_EXCL);
-    if(shmid == -1){
-        return FAILURE;
+    int shmid = shmget(SHMKEY, SHMSIZE, IPC_CREAT | IPC_EXCL | 0666);
+    if (shmid == -1) {
+        if (errno == EEXIST) {
+            // If the segment already exists, try to access the existing segment
+            fprintf(stderr, "shmget failed: Segment already exists. Trying to access existing segment.\n");
+            shmid = shmget(SHMKEY, SHMSIZE, 0666);
+            if (shmid == -1) {
+                fprintf(stderr, "shmget failed to access existing segment: %s\n", strerror(errno));
+                exit(EXIT_FAILURE);
+            }
+        } else {
+            fprintf(stderr, "shmget failed: %s\n", strerror(errno));
+            exit(EXIT_FAILURE);
+        }
     }
+    printf("Shared memory segment created or accessed with ID: %d\n", shmid);
+
     //map
-    g_addr = shmat(shmid, NULL, 0);
-    if(g_addr == NULL){
+    g_addr = (char *)shmat(shmid, NULL, 0);
+    if (g_addr == (char *)-1) {
+        fprintf(stderr, "shmat failed: %s\n", strerror(errno));
+        // Clean up the shared memory segment if needed
+        if (shmctl(shmid, IPC_RMID, NULL) == -1) {
+            fprintf(stderr, "shmctl(IPC_RMID) failed: %s\n", strerror(errno));
+        }
+        exit(EXIT_FAILURE);
         return FAILURE;
     }
+    printf("Attached to shared memory segment at address: %p\n", g_addr);
+
     //initialize shared memory information
     shm s;
     s.play_mode = SEQUENCEMODE;
     s.ppid = getpid();
 
-    memecpy((char *)g_addr, &s, sizeof(s));
+    memcpy(g_addr, &s, sizeof(s));
     
     return SUCCESS;
 }
@@ -86,7 +109,7 @@ void GetMusic(){
     }
 }
 
-void play_music(const char *name){
+void play_music(char *name){
     pid_t child_pid = fork();
     if (child_pid == -1){
         perror("fork");
@@ -94,7 +117,7 @@ void play_music(const char *name){
     }
     else if (child_pid == 0){ //create subprocess
         while(1){
-            pid_t grand_pid = vfork();
+            pid_t grand_pid = fork();
             if(grand_pid == -1){
                 perror("fork");
                 exit(1); // exit the subprocess
@@ -121,19 +144,21 @@ void play_music(const char *name){
                 }else{ //when name is emptyed by subprocess, find the next music, then play it
                     //judge play mode and fine next music
                     memcpy(&s, addr, sizeof(s));
-                    FindnextMusic(s.cur_name, s.play_mode, cur_name);
+                    FindNextMusic(s.cur_name, s.play_mode, cur_name);
                 }
                 //write information into shared memory: all the process ids, current music name
-                strcpy(s.cur_name, name);
+                memcpy(&s, addr, sizeof(s)); // read info from shared memory addr into s
+                strcpy(s.cur_name, name); // change some info of s
                 s.child_pid = getppid();
                 s.grand_pid = getpid();
-                memcpy(addr, &s, sizeof(s));
-                stmdt(addr); //cancel the map
+                memcpy(addr, &s, sizeof(s)); // write info back to shared memory addr from s
+                shmdt(addr); //cancel the map
 
                 char music_path[128] = {0};
                 strcpy(music_path, MUSICPATH);
                 strcat(music_path, cur_name);
-                execl("usr/.../madplay", "madplay", music_path, NULL); 
+                printf("Play Music: %s\n", music_path);
+                execl("/usr/bin/afplay", "afplay", music_path, NULL); 
             }
             else{ //create subprocess
                 memset(name, 0, strlen(name)); //empty the name, wait for next usage
@@ -164,5 +189,94 @@ void start_play(){
     strcpy(name, head->next->music_name);
     play_music(name);
     g_start_flag = 1;
+}
 
+void stop_play(){
+    if(g_start_flag == 0){
+        return;
+    }
+    
+    //read shared memory for pids
+    shm s;
+    memset(&s, 0, sizeof(s));
+    memcpy(&s, g_addr, sizeof(s));
+
+    kill(s.child_pid, SIGKILL);//kill subprocess
+    kill(s.grand_pid, SIGKILL);//kill sub-subprocess
+
+    g_start_flag = 0;
+}
+
+void suspend_play(){
+    if(g_start_flag == 0 || g_suspend_flag == 1){
+        return;
+    }
+
+    //read shared memory for pid    
+    shm s;
+    memset(&s, 0, sizeof(s));
+    memcpy(&s, g_addr, sizeof(s));
+
+    kill(s.grand_pid, SIGSTOP);//suspend sub-subprocess
+    kill(s.child_pid, SIGSTOP);//suspend subprocess
+
+    g_suspend_flag = 1;
+}
+
+void continue_play(){
+    if(g_start_flag == 0 || g_suspend_flag == 0){
+        return;
+    }
+
+    //read shared memory for pid    
+    shm s;
+    memset(&s, 0, sizeof(s));
+    memcpy(&s, g_addr, sizeof(s));
+
+    kill(s.grand_pid, SIGCONT);//suspend sub-subprocess
+    kill(s.child_pid, SIGCONT);//suspend subprocess
+
+    g_suspend_flag = 0;
+}
+
+void prior_play(){
+    if(g_start_flag == 0){
+        return;
+    }
+
+    //read shared memory for pids
+    shm s;
+    memset(&s, 0, sizeof(s));
+    memcpy(&s, g_addr, sizeof(s));
+
+    kill(s.child_pid, SIGKILL);//kill subprocess
+    kill(s.grand_pid, SIGKILL);//kill sub-subprocess
+
+    g_start_flag = 0;
+    char name[64] = {0};
+    FindPriorMusic(s.cur_name, s.play_mode, name);
+    play_music(name);
+
+    g_start_flag = 1;
+}
+
+void next_play(){
+    if(g_start_flag == 0){
+        return;
+    }
+
+    //read shared memory for pids
+    shm s;
+    memset(&s, 0, sizeof(s));
+    memcpy(&s, g_addr, sizeof(s));
+
+    kill(s.child_pid, SIGKILL);//kill subprocess
+    kill(s.grand_pid, SIGKILL);//kill sub-subprocess
+
+    g_start_flag = 0;
+    char name[64] = {0};
+    FindNextMusic(s.cur_name, s.play_mode, name);
+    play_music(name);
+
+    g_start_flag = 1;
 }

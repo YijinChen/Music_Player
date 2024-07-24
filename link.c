@@ -14,7 +14,7 @@ int InitLink(){
         return FAILURE;
     }
     head->next = head;
-    head->prior =head;
+    head->prior = head;
     return SUCCESS;
 }
 
@@ -39,19 +39,26 @@ int InsertLink(Node *h, const char *name){
     return SUCCESS;
 }
 
-void FindnextMusic(const char *cur, int mode, char *next){ // return the music name
-    if(mode == CIRCLE){
-        strcpy(next, cur);
-    }
-    else if(mode == SEQUENCEMODE){
+void FindNextMusic(const char *cur, int mode, char *next){ // return the music name
+    if(mode == CIRCLE || mode == SEQUENCEMODE){
         Node *p = head->next;
+
+        //find the place of current music in music list
         while(strcmp(p->music_name, cur) != 0){
             p = p->next;
+        } 
+
+        //skip the head node (head node contain no music), copy the next music name
+        if(p->next == head)
+        {
+            strcpy(next, head->next->music_name);
         }
-        strcpy(next, p->next->music_name);
+        else{
+            strcpy(next, p->next->music_name);
+        }
         return;
     }
-    else{
+    else{ //random play mode
         Node *p = head->next;
         srand(time(NULL));
         int num = rand() % 100;
@@ -61,11 +68,53 @@ void FindnextMusic(const char *cur, int mode, char *next){ // return the music n
             p = p->next;
         }
 
-        strcpy(next, p->music_name);
-
+        //if randomly chosed head node (contain no music), use the next music
+        if(p == head)
+        {
+            strcpy(next, head->next->music_name);
+        }
+        else{
+            strcpy(next, p->music_name);
+        }
         return;
     }
+}
 
+void FindPriorMusic(const char *cur, int mode, char *prior){ // return the music name
+    if(mode == CIRCLE || mode == SEQUENCEMODE){
+        Node *p = head->next;
+        //find the place of current music in music list
+        while(strcmp(p->music_name, cur) != 0){
+            p = p->next;
+        } 
 
+        //skip head node, find the prior music
+        if(p == head->next)
+        {
+            strcpy(prior, head->prior->music_name);
+        }
+        else{
+            strcpy(prior, p->prior->music_name);
+        }
+        return;
+    }
+    else{ //random play mode
+        Node *p = head->next;
+        srand(time(NULL));
+        int num = rand() % 100;
 
+        int i;
+        for (i = 0; i < num; i++){
+            p = p->next;
+        }
+
+        if(p == head)
+        {
+            strcpy(prior, head->next->music_name);
+        }
+        else{
+            strcpy(prior, p->music_name);
+        }
+        return;
+    }
 }

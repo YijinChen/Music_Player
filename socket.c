@@ -41,6 +41,7 @@ void *connect_cb(void *arg){
 
 int InitSocket(){
     g_sockfd = socket(PF_INET, SOCK_STREAM, 0);
+    //printf("g_sockfd: %d\n", g_sockfd);
     if (g_sockfd == -1){
         return FAILURE;
     }
@@ -48,6 +49,7 @@ int InitSocket(){
     //creat a thread and request the connection to server
     pthread_t tid;
     int ret = pthread_create(&tid, NULL, connect_cb, NULL);
+    //printf("ret: %d\n", ret);
     if (ret != 0){
         return FAILURE;
     }

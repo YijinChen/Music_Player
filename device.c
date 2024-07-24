@@ -29,7 +29,7 @@ int InitDriver(){
     }
 
     //turn off all 4 leds
-    for(int i; i < 4; i++){
+    for(int i = 0; i < 4; i++){
         ioctl(g_ledfd, 0, i);
     }
 
