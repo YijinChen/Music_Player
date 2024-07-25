@@ -5,7 +5,6 @@
 #include <string.h>
 #include "player.h"
 #include <time.h>
-extern struct Node *head;
 
 //initialize music list as bidirectional recycle link
 int InitLink(){
@@ -40,7 +39,7 @@ int InsertLink(Node *h, const char *name){
 }
 
 void FindNextMusic(const char *cur, int mode, char *next){ // return the music name
-    if(mode == CIRCLE || mode == SEQUENCEMODE){
+    if(mode == CIRCLEMODE || mode == SEQUENCEMODE){
         Node *p = head->next;
 
         //find the place of current music in music list
@@ -81,7 +80,7 @@ void FindNextMusic(const char *cur, int mode, char *next){ // return the music n
 }
 
 void FindPriorMusic(const char *cur, int mode, char *prior){ // return the music name
-    if(mode == CIRCLE || mode == SEQUENCEMODE){
+    if(mode == CIRCLEMODE || mode == SEQUENCEMODE){
         Node *p = head->next;
         //find the place of current music in music list
         while(strcmp(p->music_name, cur) != 0){

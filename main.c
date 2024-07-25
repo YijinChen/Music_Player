@@ -7,28 +7,23 @@
 #include "player.h"
 #include "select.h"
 
-
-int g_buttonfd = 3;
-int g_ledfd;
-int g_mixerfd; // control the voice volumn
-int g_sockfd = 3;
 struct Node *head; //head for music list
 
 int main(){
     int ret;
-    /*ret = InitDriver(); // open device files
-    if (ret == FAILURE){
-        printf("Fail to initialize device files");
-        exit(1);
-    }*/
+    // ret = InitDriver(); // open device files
+    // if (ret == FAILURE){
+    //     printf("Fail to initialize device files");
+    //     exit(1);
+    // }
 
-    ret = InitSocket(); //initialize the network connection
-    if(ret == FAILURE){
-        printf("fail to initialize network connection");
-        // if fail to connect, turn on 2 leds 
-        led_on(0);
-        led_on(1);
-    }
+    // ret = InitSocket(); //initialize the network connection
+    // if(ret == FAILURE){
+    //     printf("fail to initialize network connection");
+    //     // if fail to connect, turn on 2 leds 
+    //     led_on(0);
+    //     led_on(1);
+    // }
 
     //initialize music list
     ret = InitLink();

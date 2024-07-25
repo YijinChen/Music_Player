@@ -11,8 +11,13 @@
 #include <sys/wait.h> //for wait()
 #include <errno.h>
 #include <signal.h> //for kill()
+#include "select.h"
+#include <sys/ioctl.h>
+//#include <linux/soundcard.h>
 
-extern Node *head;
+
+struct Node *head;
+int g_mixerfd;
 void *g_addr = NULL; //map address for shared memory 
 int g_start_flag = 0; //if the player is playing music
 int g_suspend_flag = 0; //if the player suspend
@@ -76,8 +81,6 @@ int m_mp3_end(const char *name){
         return 0;
 
     return (strcmp(ptr, ".mp3") == 0) ? 1 : 0;
-
-
 }
 
 void GetMusic(){
@@ -280,3 +283,34 @@ void next_play(){
 
     g_start_flag = 1;
 }
+
+// int iLeft = 20;
+// int iRight = 60;
+
+// void voice_up(){
+//     int iLevel;
+//     if(iLeft < 100){
+//         iLeft += 5;
+//     }
+//     iLevel = (iRight << 8) + iLeft;
+//     ioctl(g_mixerfd, MIXER_WRITE(SOUND_MIXER_VOLUME), &iLevel);
+// }
+
+// void voice_down(){
+//     int iLevel;
+//     if(iLeft > 5){
+//         iLeft -= 5;
+//     }
+//     int iLevel; = (iRight << 8) + iLeft;
+//     ioctl(g_mixerfd, MIXER_WRITE(SOUND_MIXER_VOLUME), &int iLevel;);
+// }
+
+void set_mode(int mode){
+    shm s;
+    memset(&s, 0, sizeof(s));
+    memcpy(&s, g_addr, sizeof(s));
+
+    s.play_mode = mode;
+    memcpy(g_addr, &s, sizeof(s));
+    printf("successfully change mode!\n");
+;}

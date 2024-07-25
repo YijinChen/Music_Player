@@ -2,10 +2,7 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include "main.h"
-
-extern int g_buttonfd;
-extern int g_ledfd;
-extern int g_mixerfd;
+#include "select.h"
 
 void led_on(int which){
     ioctl(g_ledfd, 1, which);
@@ -32,8 +29,7 @@ int InitDriver(){
     for(int i = 0; i < 4; i++){
         ioctl(g_ledfd, 0, i);
     }
-
-
+    
     //Open the mixer device file
     g_mixerfd = open("/dev/mixer", O_WRONLY);
     if (g_mixerfd == -1){

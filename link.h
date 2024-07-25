@@ -1,6 +1,8 @@
 #ifndef LINK_H
 #define LINK_H
 
+extern struct Node *head;
+
 struct Node{
     char music_name[64];
     struct Node *next;

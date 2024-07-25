@@ -5,8 +5,10 @@
 // #include <sys/time.h>   // For struct timeval
 // #include <unistd.h>     // For close and other POSIX functions
 
-extern int g_buttonfd;
-extern int g_sockfd;
+int g_buttonfd = 3;
+int g_sockfd = 3;
+int g_ledfd;
+int g_mixerfd; // control the voice volumn
 
 void show(){
     printf("1. start\n");
@@ -17,6 +19,9 @@ void show(){
     printf("6. next\n");
     printf("7. increase volume\n");
     printf("8. decrease volume\n");
+    printf("9. sequence mode\n");
+    printf("a. random mode\n");
+    printf("b. circle mode\n");
 }
 
 
@@ -51,28 +56,46 @@ void m_select(){
         }
         else if(FD_ISSET(0, &tmpfd)){
             //use for testing on PC, data is sent by standard input   
-            int func;
-            scanf("%d", &func);
+            char func;
+            scanf("%c", &func);
 
             switch(func){
-                case 1:  //start play
-                start_play();
-                break;
-                case 2: //stop play
-                stop_play();
-                break;
-                case 3: //suspend
-                suspend_play();
-                break;
-                case 4: //continue
-                continue_play();
-                break;
-                case 5: //play last music
-                prior_play();
-                break;
-                case 6:
-                next_play();
-                break;
+                case '1':  //start play
+                    start_play();
+                    break;
+                case '2': //stop play
+                    stop_play();
+                    break;
+                case '3': //suspend
+                    suspend_play();
+                    break;
+                case '4': //continue
+                    continue_play();
+                    break;
+                case '5': //play last music
+                    prior_play();
+                    break;
+                case '6':
+                    next_play();
+                    break;
+                // case '7':
+                // voice_up();
+                // break;
+                // case '8':
+                // voice_down();
+                // break;
+                case '9':
+                    set_mode(SEQUENCEMODE);
+                    break;
+                case 'a':
+                    set_mode(RANDOMMODE);
+                    break;
+                case 'b':
+                    set_mode(CIRCLEMODE);
+                    break;
+
+                
+                
             }
         }
 

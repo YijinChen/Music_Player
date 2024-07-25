@@ -9,8 +9,7 @@
 #include <string.h>
 #include <unistd.h> // For sleep()
 #include "device.h"
-
-extern int g_sockfd;
+#include "select.h"
 
 void *connect_cb(void *arg){
     int count = 5;
