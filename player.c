@@ -291,26 +291,28 @@ void next_play(){
     g_start_flag = 1;
 }
 
-// int iLeft = 20;
-// int iRight = 60;
+int iLeft = 20;
+int iRight = 60;
 
-// void voice_up(){
-//     int iLevel;
-//     if(iLeft < 100){
-//         iLeft += 5;
-//     }
-//     iLevel = (iRight << 8) + iLeft;
-//     ioctl(g_mixerfd, MIXER_WRITE(SOUND_MIXER_VOLUME), &iLevel);
-// }
+void voice_up(){
+    int iLevel;
+    if(iLeft < 100){
+        iLeft += 5;
+    }
+    iLevel = (iRight << 8) + iLeft;
+    printf("iLevel: %d\n", iLevel);
+    //ioctl(g_mixerfd, MIXER_WRITE(SOUND_MIXER_VOLUME), &iLevel);
+}
 
-// void voice_down(){
-//     int iLevel;
-//     if(iLeft > 5){
-//         iLeft -= 5;
-//     }
-//     int iLevel; = (iRight << 8) + iLeft;
-//     ioctl(g_mixerfd, MIXER_WRITE(SOUND_MIXER_VOLUME), &int iLevel;);
-// }
+void voice_down(){
+    int iLevel;
+    if(iLeft > 5){
+        iLeft -= 5;
+    }
+    iLevel = (iRight << 8) + iLeft;
+    printf("iLevel: %d\n", iLevel);
+    //ioctl(g_mixerfd, MIXER_WRITE(SOUND_MIXER_VOLUME), &int iLevel;);
+}
 
 void set_mode(int mode){
     shm s;

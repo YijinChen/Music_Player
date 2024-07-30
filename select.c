@@ -1,7 +1,11 @@
 #include <stdio.h>
 #include <sys/select.h>
 #include "player.h"
-// #include <sys/types.h>  // For fd_set and other types
+#include <json-c/json.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <sys/types.h>  // For fd_set and other types
+#include "socket.h"
 // #include <sys/time.h>   // For struct timeval
 // #include <unistd.h>     // For close and other POSIX functions
 
@@ -9,6 +13,14 @@ int g_buttonfd = 3;
 int g_sockfd = 3;
 int g_ledfd;
 int g_mixerfd; // control the voice volumn
+
+void parse_message(const char *m, char *c){
+    struct json_object *obj = json_tokener_parse(m);
+    struct json_object *json;
+
+    json_object_object_get_ex(obj, "cmd", &json);
+    strcpy(c, json_object_get_string(json));
+}
 
 void show(){
     printf("1. start\n");
@@ -29,14 +41,15 @@ void m_select(){
     show();
     fd_set readfd, tmpfd;
     //int maxfd = (g_buttonfd > g_sockfd) ? g_buttonfd : g_sockfd;
-    int maxfd = 2;
+    int maxfd = 3;
     int ret;
+    char message[1024] = {0};
     
     FD_ZERO(&readfd);
     FD_ZERO(&tmpfd);
 
-    //FD_SET(g_buttonfd, &readfd);
-    //FD_SET(g_sockfd, &readfd);
+    FD_SET(g_buttonfd, &readfd);
+    FD_SET(g_sockfd, &readfd);
     FD_SET(0, &readfd);    // add standard input into readfd
 
     while(1){
@@ -48,7 +61,53 @@ void m_select(){
 
         if (FD_ISSET(g_sockfd, &tmpfd)){
             //if data is sent by tcp
+            memset(message, 0, sizeof(message));
+            ret = recv(g_sockfd, message, sizeof(message), 0);
+            if(ret == -1){
+                perror("recv");
+            }
+            char cmd[64] = {0};
+            parse_message(message, cmd);
 
+            if(!strcmp(cmd, "start")){
+                socket_start_play();
+            }
+            else if(!strcmp(cmd, "stop")){
+                socket_stop_play();
+            }
+            else if(!strcmp(cmd, "suspend")){
+                socket_suspend_play();
+            }
+            else if(!strcmp(cmd, "continue")){
+                socket_continue_play();
+            }
+            else if(!strcmp(cmd, "prior")){
+                socket_prior_play();
+            }
+            else if(!strcmp(cmd, "next")){
+                socket_next_play();
+            }
+            else if(!strcmp(cmd, "volume_up")){
+                socket_volume_up_play();
+            }
+            else if(!strcmp(cmd, "volume_down")){
+                socket_volume_down_play();
+            }
+            else if(!strcmp(cmd, "sequence")){
+                socket_mode_play(SEQUENCEMODE);
+            }
+            else if(!strcmp(cmd, "random")){
+                socket_mode_play(RANDOMMODE);
+            }
+            else if(!strcmp(cmd, "circle")){
+                socket_mode_play(CIRCLEMODE);
+            }
+            else if(!strcmp(cmd, "get_status")){
+                
+            }
+            else if(!strcmp(cmd, "get_music")){
+                
+            }
         }
         else if (FD_ISSET(g_buttonfd, &tmpfd)){
             //if data is sent by button

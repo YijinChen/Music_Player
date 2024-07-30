@@ -14,8 +14,8 @@ void suspend_play();
 void continue_play(); 
 void prior_play();
 void next_play();
-// void voice_up();
-// void voice_down();
+void voice_up();
+void voice_down();
 void set_mode(int mode);
 
 #define SEQUENCEMODE    1

@@ -12,11 +12,14 @@
 #include "select.h"
 #include <signal.h> //for signal()s
 #include <json-c/json.h>
+#include "player.h"
 
 //every 5 seconds, send "alive" to server
 void send_server(int sig){
     struct json_object *json = json_object_new_object();
+    json_object_object_add(json, "cmd", json_object_new_string("info"));
     json_object_object_add(json, "status", json_object_new_string("alive"));
+    json_object_object_add(json, "deviceid", json_object_new_string("001"));
     const char *buf = json_object_to_json_string(json);
     int ret = send(g_sockfd, buf, strlen(buf), 0);
     if(ret == -1){
@@ -74,4 +77,131 @@ int InitSocket(){
     }
 
     return SUCCESS;
+}
+
+void socket_start_play(){
+    start_play();
+
+    struct json_object *json = json_object_new_object();
+    json_object_object_add(json, "cmd", json_object_new_string("reply"));
+    json_object_object_add(json, "result", json_object_new_string("success"));
+
+    const char *buf = json_object_to_json_string(json);
+    int ret = send(g_sockfd, buf, strlen(buf), 0);
+    if(ret == -1){
+        perror("send");
+    }
+}
+
+void socket_stop_play(){
+    stop_play();
+
+    struct json_object *json = json_object_new_object();
+    json_object_object_add(json, "cmd", json_object_new_string("reply"));
+    json_object_object_add(json, "result", json_object_new_string("success"));
+
+    const char *buf = json_object_to_json_string(json);
+    int ret = send(g_sockfd, buf, strlen(buf), 0);
+    if(ret == -1){
+        perror("send");
+    }
+}
+
+void socket_suspend_play(){
+    suspend_play();
+
+    struct json_object *json = json_object_new_object();
+    json_object_object_add(json, "cmd", json_object_new_string("reply"));
+    json_object_object_add(json, "result", json_object_new_string("success"));
+
+    const char *buf = json_object_to_json_string(json);
+    int ret = send(g_sockfd, buf, strlen(buf), 0);
+    if(ret == -1){
+        perror("send");
+    }
+}
+
+void socket_continue_play(){
+    continue_play();
+
+    struct json_object *json = json_object_new_object();
+    json_object_object_add(json, "cmd", json_object_new_string("reply"));
+    json_object_object_add(json, "result", json_object_new_string("success"));
+
+    const char *buf = json_object_to_json_string(json);
+    int ret = send(g_sockfd, buf, strlen(buf), 0);
+    if(ret == -1){
+        perror("send");
+    }
+}
+
+
+void socket_prior_play(){
+    prior_play();
+
+    struct json_object *json = json_object_new_object();
+    json_object_object_add(json, "cmd", json_object_new_string("reply"));
+    json_object_object_add(json, "result", json_object_new_string("success"));
+
+    const char *buf = json_object_to_json_string(json);
+    int ret = send(g_sockfd, buf, strlen(buf), 0);
+    if(ret == -1){
+        perror("send");
+    }
+}
+
+void socket_next_play(){
+    next_play();
+
+    struct json_object *json = json_object_new_object();
+    json_object_object_add(json, "cmd", json_object_new_string("reply"));
+    json_object_object_add(json, "result", json_object_new_string("success"));
+
+    const char *buf = json_object_to_json_string(json);
+    int ret = send(g_sockfd, buf, strlen(buf), 0);
+    if(ret == -1){
+        perror("send");
+    }
+}
+
+void socket_volume_up_play(){
+    voice_up();
+
+    struct json_object *json = json_object_new_object();
+    json_object_object_add(json, "cmd", json_object_new_string("reply"));
+    json_object_object_add(json, "result", json_object_new_string("success"));
+
+    const char *buf = json_object_to_json_string(json);
+    int ret = send(g_sockfd, buf, strlen(buf), 0);
+    if(ret == -1){
+        perror("send");
+    }
+}
+
+void socket_volume_down_play(){
+    voice_down();
+
+    struct json_object *json = json_object_new_object();
+    json_object_object_add(json, "cmd", json_object_new_string("reply"));
+    json_object_object_add(json, "result", json_object_new_string("success"));
+
+    const char *buf = json_object_to_json_string(json);
+    int ret = send(g_sockfd, buf, strlen(buf), 0);
+    if(ret == -1){
+        perror("send");
+    }
+}
+
+void socket_mode_play(int mode){
+    set_mode(mode);
+
+    struct json_object *json = json_object_new_object();
+    json_object_object_add(json, "cmd", json_object_new_string("reply"));
+    json_object_object_add(json, "result", json_object_new_string("success"));
+
+    const char *buf = json_object_to_json_string(json);
+    int ret = send(g_sockfd, buf, strlen(buf), 0);
+    if(ret == -1){
+        perror("send");
+    }
 }
