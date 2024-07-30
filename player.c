@@ -113,6 +113,8 @@ void GetMusic(){
 }
 
 void play_music(char *name){
+    ShowLink();
+    printf("Current play: %s\n", name);
     pid_t child_pid = fork();
     if (child_pid == -1){
         perror("fork");
@@ -149,12 +151,14 @@ void play_music(char *name){
                     memcpy(&s, addr, sizeof(s));
                     FindNextMusic(s.cur_name, s.play_mode, cur_name);
                 }
+
                 //write information into shared memory: all the process ids, current music name
                 memcpy(&s, addr, sizeof(s)); // read info from shared memory addr into s
                 strcpy(s.cur_name, name); // change some info of s
                 s.child_pid = getppid();
                 s.grand_pid = getpid();
                 memcpy(addr, &s, sizeof(s)); // write info back to shared memory addr from s
+                
                 shmdt(addr); //cancel the map
 
                 char music_path[128] = {0};
@@ -164,8 +168,10 @@ void play_music(char *name){
                 execl("/usr/bin/afplay", "afplay", music_path, NULL); 
             }
             else{ //create subprocess
+                //printf("before clear the name: %s\n", name);
                 memset(name, 0, strlen(name)); //empty the name, wait for next usage
-
+                //printf("clear the name\n");
+                
                 int status;
                 waitpid(grand_pid, &status, 0); //recycle sub-subprocess
             }
@@ -220,9 +226,9 @@ void suspend_play(){
     memset(&s, 0, sizeof(s));
     memcpy(&s, g_addr, sizeof(s));
 
-    kill(s.grand_pid, SIGSTOP);//suspend sub-subprocess
     kill(s.child_pid, SIGSTOP);//suspend subprocess
-
+    kill(s.grand_pid, SIGSTOP);//suspend sub-subprocess
+    
     g_suspend_flag = 1;
 }
 
@@ -236,8 +242,9 @@ void continue_play(){
     memset(&s, 0, sizeof(s));
     memcpy(&s, g_addr, sizeof(s));
 
-    kill(s.grand_pid, SIGCONT);//suspend sub-subprocess
     kill(s.child_pid, SIGCONT);//suspend subprocess
+    kill(s.grand_pid, SIGCONT);//suspend sub-subprocess
+    
 
     g_suspend_flag = 0;
 }
@@ -312,5 +319,5 @@ void set_mode(int mode){
 
     s.play_mode = mode;
     memcpy(g_addr, &s, sizeof(s));
-    printf("successfully change mode!\n");
+    printf("successfully change mode as %d!\n", mode);
 ;}

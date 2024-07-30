@@ -6,7 +6,18 @@
 #include "player.h"
 #include <time.h>
 
+struct Node *head; //head for music list
+
 //initialize music list as bidirectional recycle link
+void ShowLink(){
+    printf("\nMusic Link:\n");
+    Node *p = head->next;
+    while(p != head ){
+        printf("%s\n", p->music_name);
+        p = p->next;
+    }
+}
+
 int InitLink(){
     head = (Node *)malloc(sizeof(Node)* 1);
     if (head == NULL){
@@ -34,6 +45,7 @@ int InsertLink(Node *h, const char *name){
     end->next = new;
     new->prior = end;
     h->prior = new;
+    //printf("successfully insert %s\n", name);
 
     return SUCCESS;
 }
@@ -45,7 +57,7 @@ void FindNextMusic(const char *cur, int mode, char *next){ // return the music n
         //find the place of current music in music list
         while(strcmp(p->music_name, cur) != 0){
             p = p->next;
-        } 
+        }
 
         //skip the head node (head node contain no music), copy the next music name
         if(p->next == head)

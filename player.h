@@ -3,7 +3,7 @@
 #include <unistd.h> //for pid_t
 
 //#define MUSICPATH "/home/ubuntu/playground/Music_Player/music_list/" //for ubuntu
-#define MUSICPATH "/Users/yijin/Documents/Cpp Projects/Music_Player/short_music_list/" //for mac
+#define MUSICPATH "/Users/yijin/Documents/Cpp_Projects/Music_Player/short_music_list/" //for mac
 #define SHMKEY 0x1234
 #define SHMSIZE 4096
 void GetMusic();

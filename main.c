@@ -6,8 +6,8 @@
 #include <stdlib.h> // for exit()
 #include "player.h"
 #include "select.h"
+#include <json-c/json.h>
 
-struct Node *head; //head for music list
 
 int main(){
     int ret;
@@ -17,13 +17,13 @@ int main(){
     //     exit(1);
     // }
 
-    // ret = InitSocket(); //initialize the network connection
-    // if(ret == FAILURE){
-    //     printf("fail to initialize network connection");
-    //     // if fail to connect, turn on 2 leds 
-    //     led_on(0);
-    //     led_on(1);
-    // }
+    ret = InitSocket(); //initialize the network connection
+    if(ret == FAILURE){
+        printf("fail to initialize network connection");
+        // if fail to connect, turn on 2 leds 
+        led_on(0);
+        led_on(1);
+    }
 
     //initialize music list
     ret = InitLink();

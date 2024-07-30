@@ -92,10 +92,7 @@ void m_select(){
                     break;
                 case 'b':
                     set_mode(CIRCLEMODE);
-                    break;
-
-                
-                
+                    break;  
             }
         }
 
