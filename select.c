@@ -66,7 +66,7 @@ void m_select(){
             if(ret == -1){
                 perror("recv");
             }
-            char cmd[64] = {0};
+            char cmd[128] = {0};
             parse_message(message, cmd);
 
             if(!strcmp(cmd, "start")){
@@ -137,12 +137,12 @@ void m_select(){
                 case '6':
                     next_play();
                     break;
-                // case '7':
-                // voice_up();
-                // break;
-                // case '8':
-                // voice_down();
-                // break;
+                case '7':
+                    voice_up();
+                    break;
+                case '8':
+                    voice_down();
+                    break;
                 case '9':
                     set_mode(SEQUENCEMODE);
                     break;

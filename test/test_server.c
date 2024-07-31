@@ -24,7 +24,7 @@ void *receive(void *arg){
         strcpy(cmd, json_object_get_string(obj));
 
         if(!strcmp(cmd, "reply")){
-            printf("operate successfully");
+            printf("operate successfully\n");
             printf("%s\n", buf);
         }
         else if(!strcmp(cmd, "info")){
