@@ -6,6 +6,8 @@
 #include <sys/socket.h>
 #include <sys/types.h>  // For fd_set and other types
 #include "socket.h"
+#include <errno.h>
+#include <unistd.h> // for sleep()
 // #include <sys/time.h>   // For struct timeval
 // #include <unistd.h>     // For close and other POSIX functions
 
@@ -13,13 +15,28 @@ int g_buttonfd = 3;
 int g_sockfd = 3;
 int g_ledfd;
 int g_mixerfd; // control the voice volumn
+fd_set readfd;
+int g_maxfd = 0;
 
-void parse_message(const char *m, char *c){
+// void parse_message(const char *m, char *c){
+//     struct json_object *obj = json_tokener_parse(m);
+//     struct json_object *json;
+
+//     json_object_object_get_ex(obj, "cmd", &json);
+//     strcpy(c, json_object_get_string(json));
+// }
+
+void parse_message(const char *m, char *c, size_t len){
     struct json_object *obj = json_tokener_parse(m);
     struct json_object *json;
 
-    json_object_object_get_ex(obj, "cmd", &json);
-    strcpy(c, json_object_get_string(json));
+    if (json_object_object_get_ex(obj, "cmd", &json)) {
+        const char *cmd_str = json_object_get_string(json);
+        strncpy(c, cmd_str, len - 1); // Use strncpy to avoid buffer overflow
+        c[len - 1] = '\0'; // Ensure null-termination
+    }
+
+    json_object_put(obj); // Free the JSON object
 }
 
 void show(){
@@ -39,9 +56,9 @@ void show(){
 
 void m_select(){
     show();
-    fd_set readfd, tmpfd;
+    fd_set tmpfd;
     //int maxfd = (g_buttonfd > g_sockfd) ? g_buttonfd : g_sockfd;
-    int maxfd = 3;
+    //int maxfd = 3;
     int ret;
     char message[1024] = {0};
     
@@ -50,12 +67,12 @@ void m_select(){
 
     FD_SET(g_buttonfd, &readfd);
     FD_SET(g_sockfd, &readfd);
-    FD_SET(0, &readfd);    // add standard input into readfd
+    //FD_SET(0, &readfd);    // add standard input into readfd
 
     while(1){
         tmpfd = readfd;
-        ret = select(maxfd + 1, &tmpfd, NULL, NULL, NULL);
-        if (ret == -1){
+        ret = select(g_maxfd + 1, &tmpfd, NULL, NULL, NULL);
+        if (ret == -1 && errno != EINTR){ //avoid "select: Interrupted system call"
             perror("select");
         }
 
@@ -66,8 +83,11 @@ void m_select(){
             if(ret == -1){
                 perror("recv");
             }
+
             char cmd[128] = {0};
-            parse_message(message, cmd);
+            //printf("In select.c: ready to parse_message\n");
+            parse_message(message, cmd, sizeof(cmd));
+            //printf("In select.c: finish parse_message\n");
 
             if(!strcmp(cmd, "start")){
                 socket_start_play();
@@ -103,7 +123,7 @@ void m_select(){
                 socket_mode_play(CIRCLEMODE);
             }
             else if(!strcmp(cmd, "get_status")){
-                
+                socket_get_status();
             }
             else if(!strcmp(cmd, "get_music")){
                 
@@ -113,47 +133,47 @@ void m_select(){
             //if data is sent by button
 
         }
-        else if(FD_ISSET(0, &tmpfd)){
-            //use for testing on PC, data is sent by standard input   
-            char func;
-            scanf("%c", &func);
+        // else if(FD_ISSET(0, &tmpfd)){
+        //     //use for testing on PC, data is sent by standard input   
+        //     char func;
+        //     scanf("%c", &func);
 
-            switch(func){
-                case '1':  //start play
-                    start_play();
-                    break;
-                case '2': //stop play
-                    stop_play();
-                    break;
-                case '3': //suspend
-                    suspend_play();
-                    break;
-                case '4': //continue
-                    continue_play();
-                    break;
-                case '5': //play last music
-                    prior_play();
-                    break;
-                case '6':
-                    next_play();
-                    break;
-                case '7':
-                    voice_up();
-                    break;
-                case '8':
-                    voice_down();
-                    break;
-                case '9':
-                    set_mode(SEQUENCEMODE);
-                    break;
-                case 'a':
-                    set_mode(RANDOMMODE);
-                    break;
-                case 'b':
-                    set_mode(CIRCLEMODE);
-                    break;  
-            }
-        }
+        //     switch(func){
+        //         case '1':  //start play
+        //             start_play();
+        //             break;
+        //         case '2': //stop play
+        //             stop_play();
+        //             break;
+        //         case '3': //suspend
+        //             suspend_play();
+        //             break;
+        //         case '4': //continue
+        //             continue_play();
+        //             break;
+        //         case '5': //play last music
+        //             prior_play();
+        //             break;
+        //         case '6':
+        //             next_play();
+        //             break;
+        //         case '7':
+        //             voice_up();
+        //             break;
+        //         case '8':
+        //             voice_down();
+        //             break;
+        //         case '9':
+        //             set_mode(SEQUENCEMODE);
+        //             break;
+        //         case 'a':
+        //             set_mode(RANDOMMODE);
+        //             break;
+        //         case 'b':
+        //             set_mode(CIRCLEMODE);
+        //             break;  
+        //     }
+        // }
 
     }
 

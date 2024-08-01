@@ -3,6 +3,7 @@
 #include <sys/ioctl.h>
 #include "main.h"
 #include "select.h"
+#include "player.h"
 
 void led_on(int which){
     ioctl(g_ledfd, 1, which);
@@ -34,6 +35,10 @@ int InitDriver(){
     g_mixerfd = open("/dev/mixer", O_WRONLY);
     if (g_mixerfd == -1){
         return FAILURE;
+    }
+
+    if(g_mixerfd > g_maxfd){
+        g_maxfd = g_mixerfd;
     }
 
     return SUCCESS;

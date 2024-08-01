@@ -31,6 +31,9 @@ struct shm{
     pid_t grand_pid;
 };
 typedef struct shm shm;
+extern int iLeft;
+extern int g_start_flag;
+extern int g_suspend_flag;
 
 #endif
 

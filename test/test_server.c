@@ -30,6 +30,9 @@ void *receive(void *arg){
         else if(!strcmp(cmd, "info")){
             printf("%s\n", buf);
         }
+        else if(!strcmp(cmd, "reply_status")){
+            printf("%s\n", buf);
+        }
     }
 }
 

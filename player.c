@@ -17,10 +17,12 @@
 
 
 struct Node *head;
-int g_mixerfd;
 void *g_addr = NULL; //map address for shared memory 
 int g_start_flag = 0; //if the player is playing music
 int g_suspend_flag = 0; //if the player suspend
+
+int iLeft = 20; // use for volume
+int iRight = 60;
 
 //initialize shared memory
 int InitShm(){
@@ -193,6 +195,13 @@ void start_play(){
         return;
     }
 
+    //set volume
+    int iLevel;
+    iLeft = 80;
+    iLevel = (iRight << 8) + iLeft;
+    printf("iLevel: %d\n", iLevel);
+    //ioctl(g_mixerfd, MIXER_WRITE(SOUND_MIXER_VOLUME), &iLevel);
+
     //start to play music
     char name[128] = {0};
     strcpy(name, head->next->music_name);
@@ -291,8 +300,7 @@ void next_play(){
     g_start_flag = 1;
 }
 
-int iLeft = 20;
-int iRight = 60;
+
 
 void voice_up(){
     int iLevel;

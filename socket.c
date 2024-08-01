@@ -13,6 +13,8 @@
 #include <signal.h> //for signal()s
 #include <json-c/json.h>
 #include "player.h"
+#include <sys/select.h>
+#include <errno.h>
 
 //every 5 seconds, send "alive" to server
 void send_server(int sig){
@@ -28,21 +30,36 @@ void send_server(int sig){
     alarm(5);
 }
 
+void my_sleep(int seconds) {
+    struct timespec ts;
+    ts.tv_sec = seconds;
+    ts.tv_nsec = 0;
+
+    while (nanosleep(&ts, &ts) == -1 && errno == EINTR) {
+        // Loop until sleep completes successfully
+        continue;
+    }
+}
 
 void *connect_cb(void *arg){
     int count = 5;
+
     struct sockaddr_in server_addr;
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = PF_INET;
     server_addr.sin_port = SERVER_PORT;
     server_addr.sin_addr.s_addr = inet_addr(SERVER_IP);
+
     while(count--){
         //when sending connection request to server, let the first led shine
         //led_on(0);
-        int ret = connect(g_sockfd, (struct sockaddr *) &server_addr, sizeof(server_addr));
+        printf("try to connect, count = %d\n", count);
+        int ret = connect(g_sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr));
         if (ret == -1){
-            //printf("fail to connect\n");
-            sleep(5); // If fail to connect, sleep 5 seconds
+            printf("fail to connect\n");
+            printf("Retrying connection in 5 seconds...\n");
+            my_sleep(5); // If fail to connect, sleep 5 seconds
+            printf("finish sleep\n");
             continue;
         }
         //when connection is successful, let all 4 leds shine
@@ -55,9 +72,10 @@ void *connect_cb(void *arg){
         alarm(5);
         signal(SIGALRM, send_server);
 
+        //sucessfully connect to server, add fd to set
+        FD_SET(g_sockfd, &readfd);
         break;
     }
-
     return NULL;
 }
 
@@ -73,7 +91,12 @@ int InitSocket(){
     int ret = pthread_create(&tid, NULL, connect_cb, NULL);
     //printf("ret: %d\n", ret);
     if (ret != 0){
+        printf("In InitSocket: fail to creat pthread\n");
         return FAILURE;
+    }
+
+    if(g_sockfd > g_maxfd){
+        g_maxfd = g_sockfd;
     }
 
     return SUCCESS;
@@ -204,4 +227,30 @@ void socket_mode_play(int mode){
     if(ret == -1){
         perror("send");
     }
+}
+
+
+void socket_get_status(){
+    //play status, current music, volume
+    struct json_object *json = json_object_new_object();
+    json_object_object_add(json, "cmd", json_object_new_string("reply_status"));
+    if(g_start_flag == 1 && g_suspend_flag == 0){
+        json_object_object_add(json, "status", json_object_new_string("start"));
+    }
+    else if(g_start_flag == 1 && g_suspend_flag == 1){
+        json_object_object_add(json, "status", json_object_new_string("suspend"));
+    }
+    else if(g_start_flag == 0){
+        json_object_object_add(json, "status", json_object_new_string("stop"));
+    }
+    json_object_object_add(json, "voice", json_object_new_int(iLeft));
+    
+    json_object_object_add(json, "result", json_object_new_string("success"));
+
+    const char *buf = json_object_to_json_string(json);
+    int ret = send(g_sockfd, buf, strlen(buf), 0);
+    if(ret == -1){
+        perror("send");
+    }
+
 }

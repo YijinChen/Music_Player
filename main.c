@@ -28,7 +28,7 @@ int main(){
     //initialize music list
     ret = InitLink();
     if(ret == FAILURE){
-        printf("fail to initialize music list");
+        printf("fail to initialize music list\n");
         exit(1);
     }
 
@@ -40,7 +40,10 @@ int main(){
     }
 
     GetMusic();
+    printf("In main.c: ready to select\n");
     m_select();
+    printf("In main.c: finish to select\n");
+
 
     return 0;
 }

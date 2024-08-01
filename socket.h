@@ -17,5 +17,6 @@ void socket_next_play();
 void socket_volume_up_play();
 void socket_volume_down_play();
 void socket_mode_play(int mode);
+void socket_get_status();
 
 #endif
