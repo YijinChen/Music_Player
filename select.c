@@ -122,11 +122,12 @@ void m_select(){
             else if(!strcmp(cmd, "circle")){
                 socket_mode_play(CIRCLEMODE);
             }
-            else if(!strcmp(cmd, "get_status")){
+            else if(!strcmp(cmd, "get")){
+                printf("received get\n");
                 socket_get_status();
             }
-            else if(!strcmp(cmd, "get_music")){
-                
+            else if(!strcmp(cmd, "music")){
+                socket_get_music();
             }
         }
         else if (FD_ISSET(g_buttonfd, &tmpfd)){

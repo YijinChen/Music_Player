@@ -34,6 +34,7 @@ typedef struct shm shm;
 extern int iLeft;
 extern int g_start_flag;
 extern int g_suspend_flag;
+extern void *g_addr;
 
 #endif
 

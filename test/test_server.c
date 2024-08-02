@@ -12,10 +12,15 @@
 
 void *receive(void *arg){
     int fd = *(int *)arg;
-    char buf[1024] = {0};
+    
 
     while(1){
+        char buf[1024] = {0};
         int ret = recv(fd, buf, sizeof(buf), 0);
+        if(ret == -1){
+            perror("recv");
+        }
+
         struct json_object *json = json_tokener_parse(buf);
         struct json_object *obj;
         json_object_object_get_ex(json, "cmd", &obj);
@@ -31,6 +36,11 @@ void *receive(void *arg){
             printf("%s\n", buf);
         }
         else if(!strcmp(cmd, "reply_status")){
+            printf("operate successfully\n");
+            printf("%s\n", buf);
+        }
+        else if(!strcmp(cmd, "reply_music")){
+            printf("operate successfully\n");
             printf("%s\n", buf);
         }
     }

@@ -15,6 +15,7 @@
 #include "player.h"
 #include <sys/select.h>
 #include <errno.h>
+#include "link.h"
 
 //every 5 seconds, send "alive" to server
 void send_server(int sig){
@@ -42,7 +43,7 @@ void my_sleep(int seconds) {
 }
 
 void *connect_cb(void *arg){
-    int count = 5;
+    int count = 10;
 
     struct sockaddr_in server_addr;
     memset(&server_addr, 0, sizeof(server_addr));
@@ -58,7 +59,7 @@ void *connect_cb(void *arg){
         if (ret == -1){
             printf("fail to connect\n");
             printf("Retrying connection in 5 seconds...\n");
-            my_sleep(5); // If fail to connect, sleep 5 seconds
+            my_sleep(3); // If fail to connect, sleep 5 seconds
             printf("finish sleep\n");
             continue;
         }
@@ -229,6 +230,19 @@ void socket_mode_play(int mode){
     }
 }
 
+// void socket_start_play(){
+//     start_play();
+
+//     struct json_object *json = json_object_new_object();
+//     json_object_object_add(json, "cmd", json_object_new_string("reply"));
+//     json_object_object_add(json, "result", json_object_new_string("success"));
+
+//     const char *buf = json_object_to_json_string(json);
+//     int ret = send(g_sockfd, buf, strlen(buf), 0);
+//     if(ret == -1){
+//         perror("send");
+//     }
+// }
 
 void socket_get_status(){
     //play status, current music, volume
@@ -245,12 +259,39 @@ void socket_get_status(){
     }
     json_object_object_add(json, "voice", json_object_new_int(iLeft));
     
-    json_object_object_add(json, "result", json_object_new_string("success"));
+    shm s;
+    // Ensure g_addr is not NULL
+    if (g_addr == NULL) {
+        fprintf(stderr, "Error: g_addr is NULL\n");
+        return;
+    }
+    memcpy(&s, g_addr, sizeof(s));
+    // Ensure s.cur_name is properly null-terminated
+    s.cur_name[sizeof(s.cur_name) - 1] = '\0';
+    json_object_object_add(json, "music", json_object_new_string(s.cur_name));
 
     const char *buf = json_object_to_json_string(json);
     int ret = send(g_sockfd, buf, strlen(buf), 0);
     if(ret == -1){
         perror("send");
     }
+}
 
+void socket_get_music(){
+    struct json_object *json = json_object_new_object();
+    json_object_object_add(json, "cmd", json_object_new_string("reply_music"));
+
+    struct json_object *array = json_object_new_array();
+    Node *p = head->next;
+    while(p != head){
+        json_object_array_add(array, json_object_new_string(p->music_name));//put music name into array
+        p = p->next;
+    }
+    json_object_object_add(json, "music", array);
+
+    const char *buf = json_object_to_json_string(json);
+    int ret = send(g_sockfd, buf, strlen(buf), 0);
+    if(ret == -1){
+        perror("send");
+    }
 }

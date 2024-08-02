@@ -46,8 +46,9 @@ server: {"cmd": "circle"};
 client: {"cmd": "reply", "result": "success"};
 
 13. get player status
-server: {"cmd": "get_status"};
+server: {"cmd": "get"};
 client: {"cmd": "reply_status", "status": "start", "music": "xx.mp3", "voice": "50"}; start
 
 14. get music
-server: {"cmd": "get_music"}
+server: {"cmd": "music"};
+client: {"cmd": "reply_music", "music": {[1.mp3], [2.mp3], [3.mp3]}};
