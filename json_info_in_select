@@ -1,61 +1,86 @@
 0. bind
 app: {"cmd": "bind", "appid": "101", "deviceid": "001"};
+server: {"cmd": "bind_sucess"};
 
 1. keep alive
 client: ("cmd": "info", "status": "alive", "deviceid" : "001");
 
-1. start to play
-server: {"cmd": "start"};
+2. start to play
+app: {"cmd": "app_start"};
+server to client: {"cmd": "start"};
 client: {"cmd": "reply", "result": "success"};
+server to app: {"cmd": "app_reply", "result": "success"};
 
-1. stop playing
-server: {"cmd": "stop"};
+3. stop playing
+app: {"cmd": "app_stop"};
+server to client: {"cmd": "stop"};
 client: {"cmd": "reply", "result": "success"};
+server to app: {"cmd": "app_reply", "result": "success"};
 
-1. suspend playing
-server: {"cmd": "suspend"};
+4. suspend playing
+app: {"cmd": "app_suspend"};
+server to client: {"cmd": "suspend"};
 client: {"cmd": "reply", "result": "success"};
+server to app: {"cmd": "app_reply", "result": "success"};
 
-1. continue playing
-server: {"cmd": "continue"};
+5. continue playing
+app: {"cmd": "app_continue"};
+server to client: {"cmd": "continue"};
 client: {"cmd": "reply", "result": "success"};
+server to app: {"cmd": "app_reply", "result": "success"};
 
-1. play last one
-server: {"cmd": "prior"};
+6. play prior one
+app: {"cmd": "app_prior"};
+server to client: {"cmd": "prior"};
 client: {"cmd": "reply", "result": "success"};
+server to app: {"cmd": "app_reply", "result": "success"};
 
-1. play next one
-server: {"cmd": "next"};
+7. play next one
+app: {"cmd": "app_next"};
+server to client: {"cmd": "next"};
 client: {"cmd": "reply", "result": "success"};
+server to app: {"cmd": "app_reply", "result": "success"};
 
-1. increase volume
-server: {"cmd": "volume_up"};
+8. increase volume
+app: {"cmd": "app_volume_up"};
+server to client: {"cmd": "volume_up"};
 client: {"cmd": "reply", "result": "success"};
+server to app: {"cmd": "app_reply", "result": "success"};
 
-1. increase volume
-server: {"cmd": "volume_down"};
+9. increase volume
+app: {"cmd": "app_volume_down"};
+server to client: {"cmd": "volume_down"};
 client: {"cmd": "reply", "result": "success"};
+server to app: {"cmd": "app_reply", "result": "success"};
 
-1.  sequence mode
-server: {"cmd": "sequence"};
+10. sequence mode
+app: {"cmd": "app_sequence"};
+server to client: {"cmd": "sequence"};
 client: {"cmd": "reply", "result": "success"};
+server to app: {"cmd": "app_reply", "result": "success"};
 
-1.  random mode
-server: {"cmd": "random"};
+11. random mode
+app: {"cmd": "app_random"};
+server to client: {"cmd": "random"};
 client: {"cmd": "reply", "result": "success"};
+server to app: {"cmd": "app_reply", "result": "success"};
 
-1.  circle mode
-server: {"cmd": "circle"};
+12. circle mode
+app: {"cmd": "app_circle"};
+server to client: {"cmd": "circle"};
 client: {"cmd": "reply", "result": "success"};
+server to app: {"cmd": "app_reply", "result": "success"};
 
-1.  get player status
+13. get player status
 server: {"cmd": "get"};
-client: {"cmd": "reply_status", "status": "start", "music": "xx.mp3", "voice": "50"}; start
+client: {"cmd": "reply_status", "status": "start", "music": "xx.mp3", "voice": "50"}; start suspend stop
+server to app: {"cmd": "reply_status", "status": "start", "music": "xx.mp3", "voice": "50"};
 
-1.  get music
-server: {"cmd": "music"};
+14. get music
+app: {"cmd": "app_music"};
+server to client: {"cmd": "music"};
 client: {"cmd": "reply_music", "music": {[1.mp3], [2.mp3], [3.mp3]}};
+server to app: {"cmd": "reply_music", "music": {[1.mp3], [2.mp3], [3.mp3]}};
 
 keys:
-1.start
-11.stop 
+start

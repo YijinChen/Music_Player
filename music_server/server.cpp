@@ -47,6 +47,73 @@ void PlayerServer::read_cb(struct bufferevent *bev, void *ctx){
     if(ret < 0){
         std::cout << "bufferevent_read error" << std::endl;
     }
+
+    Json::Reader reader; //analysis json object
+    Json::Value val; //analyzed result
+    bool result = reader.parse(buf,val);
+    if(!result){
+        std::cout << "fail to parse json" << std::endl;
+        return;
+    }
+
+    //parse message from app
+    if(!strcmp(val["cmd"].asString().c_str(), "bind")){ //received "bind" from app
+    
+    }
+    else if(!strcmp(val["cmd"].asString().c_str(), "app_start")){
+
+    }
+    else if(!strcmp(val["cmd"].asString().c_str(), "app_stop")){
+
+    }
+    else if(!strcmp(val["cmd"].asString().c_str(), "app_suspend")){
+
+    }
+    else if(!strcmp(val["cmd"].asString().c_str(), "app_continue")){
+
+    }
+    else if(!strcmp(val["cmd"].asString().c_str(), "app_prior")){
+
+    }
+    else if(!strcmp(val["cmd"].asString().c_str(), "app_next")){
+
+    }
+    else if(!strcmp(val["cmd"].asString().c_str(), "app_volume_up")){
+
+    }
+    else if(!strcmp(val["cmd"].asString().c_str(), "app_volume_down")){
+
+    }
+    else if(!strcmp(val["cmd"].asString().c_str(), "app_sequence")){
+
+    }
+    else if(!strcmp(val["cmd"].asString().c_str(), "app_random")){
+
+    }
+    else if(!strcmp(val["cmd"].asString().c_str(), "app_circle")){
+
+    }
+    else if(!strcmp(val["cmd"].asString().c_str(), "app_music")){
+
+    }
+    //messages from music_player(client)
+    else if(!strcmp(val["cmd"].asString().c_str(), "reply")){
+
+    }
+    else if(!strcmp(val["cmd"].asString().c_str(), "info")){
+
+    }
+    else if(!strcmp(val["cmd"].asString().c_str(), "reply_status")){
+
+    }
+    else if(!strcmp(val["cmd"].asString().c_str(), "reply_music")){
+
+    }
+
+
+
+
+    
 }
 
 void PlayerServer::event_cb(struct bufferevent *bev, short wait, void *ctx){
