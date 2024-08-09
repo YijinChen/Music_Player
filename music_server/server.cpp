@@ -1,0 +1,59 @@
+#include "server.h"
+#include <event2/event.h>
+#include <event2/listener.h>
+#include <event2/bufferevent.h>
+#include <string.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <iostream>
+
+PlayerServer::PlayerServer(const char *ip, int port){
+    base = event_base_new();
+    struct sockaddr_in server_addr;
+    memset(&server_addr, 0, sizeof(server_addr));
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = port;
+    server_addr.sin_addr.s_addr = inet_addr(ip);
+    listener = evconnlistener_new_bind(base, listener_cb, base, LEV_OPT_CLOSE_ON_FREE | LEV_OPT_REUSEABLE, 10, (struct sockaddr *)&server_addr, sizeof(server_addr));
+    if(listener == NULL){
+        std::cout << "evconnlistener_new_bind error\n" << std::endl;
+    }
+    event_base_dispatch(base); //listen to the set
+}
+
+PlayerServer::~PlayerServer(){
+    //free two objects
+    evconnlistener_free(listener);
+    event_base_free(base);
+}
+
+void PlayerServer::listener_cb(struct evconnlistener *listener, evutil_socket_t fd, struct sockaddr *addr, int socklen, void *arg){
+    struct event_base *base = (struct event_base *)arg; 
+    std::cout << "Client is applying for connect" << fd << std::endl;
+
+    //create buffer event
+    struct bufferevent *bev = bufferevent_socket_new(base, fd, BEV_OPT_CLOSE_ON_FREE);
+    if(bev == NULL){
+        std::cout << "bufferevent_socket_new error" << std::endl;
+    }
+    bufferevent_setcb(bev, read_cb, NULL, event_cb, NULL);
+    bufferevent_enable(bev, EV_READ);
+}
+
+void PlayerServer::read_cb(struct bufferevent *bev, void *ctx){
+    char buf[1024] = {0};
+    size_t ret = bufferevent_read(bev, buf, sizeof(buf));
+    if(ret < 0){
+        std::cout << "bufferevent_read error" << std::endl;
+    }
+}
+
+void PlayerServer::event_cb(struct bufferevent *bev, short wait, void *ctx){
+    if(wait & BEV_EVENT_EOF){
+        std::cout << "Client if off" << std::endl;
+    }
+    else{
+        std::cout << "unexpected error" << std::endl;
+    }
+}

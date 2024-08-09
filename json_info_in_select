@@ -1,54 +1,61 @@
+0. bind
+app: {"cmd": "bind", "appid": "101", "deviceid": "001"};
+
 1. keep alive
 client: ("cmd": "info", "status": "alive", "deviceid" : "001");
 
-2. start to play
+1. start to play
 server: {"cmd": "start"};
 client: {"cmd": "reply", "result": "success"};
 
-3. stop playing
+1. stop playing
 server: {"cmd": "stop"};
 client: {"cmd": "reply", "result": "success"};
 
-4. suspend playing
+1. suspend playing
 server: {"cmd": "suspend"};
 client: {"cmd": "reply", "result": "success"};
 
-5. continue playing
+1. continue playing
 server: {"cmd": "continue"};
 client: {"cmd": "reply", "result": "success"};
 
-6. play last one
+1. play last one
 server: {"cmd": "prior"};
 client: {"cmd": "reply", "result": "success"};
 
-7. play next one
+1. play next one
 server: {"cmd": "next"};
 client: {"cmd": "reply", "result": "success"};
 
-8. increase volume
+1. increase volume
 server: {"cmd": "volume_up"};
 client: {"cmd": "reply", "result": "success"};
 
-9. increase volume
+1. increase volume
 server: {"cmd": "volume_down"};
 client: {"cmd": "reply", "result": "success"};
 
-10. sequence mode
+1.  sequence mode
 server: {"cmd": "sequence"};
 client: {"cmd": "reply", "result": "success"};
 
-11. random mode
+1.  random mode
 server: {"cmd": "random"};
 client: {"cmd": "reply", "result": "success"};
 
-12. circle mode
+1.  circle mode
 server: {"cmd": "circle"};
 client: {"cmd": "reply", "result": "success"};
 
-13. get player status
+1.  get player status
 server: {"cmd": "get"};
 client: {"cmd": "reply_status", "status": "start", "music": "xx.mp3", "voice": "50"}; start
 
-14. get music
+1.  get music
 server: {"cmd": "music"};
 client: {"cmd": "reply_music", "music": {[1.mp3], [2.mp3], [3.mp3]}};
+
+keys:
+1.start
+11.stop 
