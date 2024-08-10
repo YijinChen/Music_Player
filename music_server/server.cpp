@@ -8,8 +8,11 @@
 #include <arpa/inet.h>
 #include <iostream>
 
+
+
 PlayerServer::PlayerServer(const char *ip, int port){
-    base = event_base_new();
+    base = event_base_new();     //create set for events
+
     struct sockaddr_in server_addr;
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
@@ -42,6 +45,7 @@ void PlayerServer::listener_cb(struct evconnlistener *listener, evutil_socket_t 
 }
 
 void PlayerServer::read_cb(struct bufferevent *bev, void *ctx){
+    std::list<Node> *l = new std::list<Node>;
     char buf[1024] = {0};
     size_t ret = bufferevent_read(bev, buf, sizeof(buf));
     if(ret < 0){
@@ -58,7 +62,13 @@ void PlayerServer::read_cb(struct bufferevent *bev, void *ctx){
 
     //parse message from app
     if(!strcmp(val["cmd"].asString().c_str(), "bind")){ //received "bind" from app
-    
+        Node n;
+        n.app_bev = bev;
+        strcpy(n.app_id, val["appid"].asString().c_str());
+        strcpy(n.device_id, val["deviceid"].asString().c_str());
+        n.online_flag = 0;
+        l->push_back(n);
+
     }
     else if(!strcmp(val["cmd"].asString().c_str(), "app_start")){
 
