@@ -24,7 +24,7 @@ PlayerServer::PlayerServer(const char *ip, int port){
     if(listener == NULL){
         std::cout << "evconnlistener_new_bind error\n" << std::endl;
     }
-    event_base_dispatch(base); //listen to the set
+    event_base_dispatch(base);    //listen to the set
 }
 
 PlayerServer::~PlayerServer(){
@@ -112,7 +112,7 @@ void PlayerServer::read_cb(struct bufferevent *bev, void *ctx){
     }
     else if(!strcmp(val["cmd"].asString().c_str(), "info")){
         p->player_alive_info(l, bev, val);
-
+        
     }
     else if(!strcmp(val["cmd"].asString().c_str(), "reply_status")){
 

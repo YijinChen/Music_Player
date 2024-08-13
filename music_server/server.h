@@ -7,7 +7,7 @@
 #include "player.h"
 #include "node.h"
 
-#define IP "18.185.92.160"
+#define IP "172.31.47.86"
 #define PORT 8000
 
 class PlayerServer{
