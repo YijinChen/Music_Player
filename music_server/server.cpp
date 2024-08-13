@@ -22,7 +22,7 @@ PlayerServer::PlayerServer(const char *ip, int port){
     server_addr.sin_addr.s_addr = inet_addr(ip);
     listener = evconnlistener_new_bind(base, listener_cb, base, LEV_OPT_CLOSE_ON_FREE | LEV_OPT_REUSEABLE, 10, (struct sockaddr *)&server_addr, sizeof(server_addr));
     if(listener == NULL){
-        std::cout << "evconnlistener_new_bind error\n" << std::endl;
+        std::cout << "evconnlistener_new_bind error\n" << strerror(errno) << std::endl;
     }
     event_base_dispatch(base);    //listen to the set
 }
@@ -112,7 +112,7 @@ void PlayerServer::read_cb(struct bufferevent *bev, void *ctx){
     }
     else if(!strcmp(val["cmd"].asString().c_str(), "info")){
         p->player_alive_info(l, bev, val);
-        
+
     }
     else if(!strcmp(val["cmd"].asString().c_str(), "reply_status")){
 
