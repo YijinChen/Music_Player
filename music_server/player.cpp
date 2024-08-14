@@ -14,7 +14,7 @@ void Player::player_alive_info(std::list<Node> *l, struct bufferevent *bev, Json
             }
         }
     }
-    std::cout << "received keep alive info, but the app is not binded yet" << std::endl;
+    std::cout << "received keep alive info, but the app is not bound yet" << std::endl;
 }
 
 //server received command from app, then the server transfer the command to music_player

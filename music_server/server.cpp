@@ -72,6 +72,29 @@ void PlayerServer::read_cb(struct bufferevent *bev, void *ctx){
         n.online_flag = 0;
         l->push_back(n);
     }
+    else if(!strcmp(cmd, "search_bind")){
+        //check if app_id exists in the list
+        std::list<Node>::iterator it;
+        for (it = l->begin(); it != l->end(); it++){
+            if(!strcmp(it->app_id, val["appid"].asString().c_str())){
+                //update app_bev
+                it->app_bev = bev;
+                //app_id exists
+                val["cmd"] = "reply_bind";
+                val["result"] = "yes";
+                break;
+            }
+        }
+        if (it == l->end()){      //appid doesn't exist
+            val["cmd"] = "reply_bind";
+            val["result"] = "no";
+        }
+        std::string str = Json::FastWriter().write(val);
+        size_t ret = bufferevent_write(bev, str.c_str(), strlen(str.c_str()));
+        if (ret < 0){
+            std::cout << "bufferevent_write error\n";
+        }
+    }
     else if(!strcmp(cmd, "app_start")){
         p->player_operation(l, bev, cmd);
     }

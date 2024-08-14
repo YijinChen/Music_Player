@@ -7,6 +7,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <json-c/json.h>
 
 void *receive(void *arg){
     int sockfd = *(int *)arg;
@@ -36,24 +37,42 @@ int main(){
         exit(1);
     }
 
+    char buf[1024] = {0};
+    //check if app already binded
+    const char *bl = "{\"cmd\": \"search_bind\", \"appid\": \"101\"}";
+    send(sockfd, bl, strlen(bl), 0);
+    recv(sockfd, buf, sizeof(buf), 0);
+
+    //parse json
+    struct json_object *obj = json_tokener_parse(buf);
+    struct json_object *json;
+    json_object_object_get_ex(obj, "result", &json);
+    if(!strcmp(json_object_get_string(json), "yes")){
+        printf("app already bound\n");
+    }
+    else if(!strcmp(json_object_get_string(json), "no")){
+        printf("app not yet bound\n");
+
+        //bind app with device
+        const char *b2 = "{\"cmd\": \"bind\", \"appid\": \"101\", \"deviceid\": \"001\"}";
+        ret = send(sockfd, b2, strlen(b2), 0);
+        if (ret == -1){
+            perror("send");
+            exit(1);
+        }
+    }
+
     pthread_t tid; //use for receive info
     pthread_create(&tid, NULL, receive, &sockfd);
 
-    while(1){
-        const char *buf = "{\"cmd\": \"bind\", \"appid\": \"101\", \"deviceid\": \"001\"}";
-        ret = send(sockfd, buf, strlen(buf), 0);
-        if (ret == -1){
-            perror("send");
-            exit(1);
-        }
-        sleep(5); //sleep for a time as long as the "keep alive" intervel
-        const char *b = "{\"cmd\": \"app_start\"}";
-        ret = send(sockfd, b, strlen(b), 0);
-        if (ret == -1){
-            perror("send");
-            exit(1);
-        }
-        sleep(50000);
+    sleep(5); //sleep for a time as long as the "keep alive" intervel
+    const char *b = "{\"cmd\": \"app_start\"}";
+    ret = send(sockfd, b, strlen(b), 0);
+    if (ret == -1){
+        perror("send");
+        exit(1);
     }
+    sleep(50000);
+
     close(sockfd);
 }
