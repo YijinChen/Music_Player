@@ -17,6 +17,8 @@ void Player::player_alive_info(std::list<Node> *l, struct bufferevent *bev, Json
     std::cout << "received keep alive info, but the app is not binded yet" << std::endl;
 }
 
+//server received command from app, then the server transfer the command to music_player
+//app_bev is app's bufferevent
 void Player::player_operation(std::list<Node> *l, struct bufferevent *app_bev, const char* cmd){
     Json::Value val;
     if(!strcmp(cmd, "app_start")){
@@ -76,9 +78,37 @@ void Player::player_operation(std::list<Node> *l, struct bufferevent *app_bev, c
                 if(ret < 0){
                     std::cout << "bufferevent_write error\n";
                 }
-
             }
-
         }
     }
+}
+
+//server received reply from music_player, then the server will send info to app
+//bev is music_pkayer's bufferevent
+void Player::player_reply_result(std::list<Node> *l, struct bufferevent *bev, Json::Value val){
+    char cmd[32] = {0};
+    strcpy(cmd, val["cmd"].asString().c_str());
+    if(!strcmp(cmd, "reply")){
+        val["cmd"] = "app_reply";
+    }
+    else if (!strcmp(cmd, "reply_music")){
+        val["cmd"] = "app_reply_music";
+    }
+    else if (!strcmp(cmd, "reply_status")){
+        val["cmd"] = "app_reply";
+    }
+
+    std::string str = Json::FastWriter().write(val);
+    size_t ret;
+    //check the list, find the bufferevent corrresponding to app
+    for(std::list<Node>::iterator it = l->begin(); it != l->end(); it++){
+        if(it->device_bev == bev){
+            ret = bufferevent_write(it->app_bev, str.c_str(), strlen(str.c_str()));
+            if(ret < 0){
+                std::cout << "bufferevent_write error\n";
+            }
+            return;
+        }
+    }
+    std::cout << "app doesn't exist.\n";
 }

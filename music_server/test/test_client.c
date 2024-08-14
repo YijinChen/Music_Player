@@ -16,7 +16,10 @@ void *receive(void *arg){
     while(1){
         memset(buf, 0, sizeof(buf));
         int ret = recv(sockfd, buf, sizeof(buf), 0);
-        printf("%s\n", buf);
+        printf("received info from server: %s\n", buf);
+        sleep(1);
+        const char *s = "{\"cmd\": \"reply\", \"result\": \"success\"}";
+        send(sockfd, s, strlen(s), 0);
     }
 }
 

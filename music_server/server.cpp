@@ -106,20 +106,20 @@ void PlayerServer::read_cb(struct bufferevent *bev, void *ctx){
         p->player_operation(l, bev, cmd);
     }
     else if(!strcmp(cmd, "app_music")){
-    
+        p->player_operation(l, bev, cmd);
     }
     //messages from music_player(client)
-    else if(!strcmp(val["cmd"].asString().c_str(), "reply")){
-
+    else if(!strcmp(cmd, "reply")){
+        p->player_reply_result(l, bev, val);
     }
-    else if(!strcmp(val["cmd"].asString().c_str(), "info")){
+    else if(!strcmp(cmd, "info")){
         p->player_alive_info(l, bev, val);
     }
-    else if(!strcmp(val["cmd"].asString().c_str(), "reply_status")){
-
+    else if(!strcmp(cmd, "reply_status")){
+        p->player_reply_result(l, bev, val);
     }
-    else if(!strcmp(val["cmd"].asString().c_str(), "reply_music")){
-
+    else if(!strcmp(cmd, "reply_music")){
+        p->player_reply_result(l, bev, val);
     }
 }
 

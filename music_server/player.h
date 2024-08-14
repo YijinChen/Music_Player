@@ -16,6 +16,7 @@ class Player{
     public:
     void player_alive_info(std::list<Node> *l, struct bufferevent *bev, Json::Value val);
     void player_operation(std::list<Node> *l, struct bufferevent *app_bev, const char* cmd);
+    void player_reply_result(std::list<Node> *l, struct bufferevent *bev, Json::Value val);
 };
 
 #endif

@@ -6,6 +6,17 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <pthread.h>
+
+void *receive(void *arg){
+    int sockfd = *(int *)arg;
+    char buf[1024] = {0};
+    while(1){
+        recv(sockfd, buf, sizeof(buf), 0);
+        printf("reveiced reply from server: %s\n", buf);
+        memset(buf, 0, sizeof(buf));
+    }
+}
 
 int main(){
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -25,6 +36,9 @@ int main(){
         exit(1);
     }
 
+    pthread_t tid; //use for receive info
+    pthread_create(&tid, NULL, receive, &sockfd);
+
     while(1){
         const char *buf = "{\"cmd\": \"bind\", \"appid\": \"101\", \"deviceid\": \"001\"}";
         ret = send(sockfd, buf, strlen(buf), 0);
@@ -32,7 +46,7 @@ int main(){
             perror("send");
             exit(1);
         }
-        sleep(5); //sleep at least for a time as long as the "keep alive" intervel
+        sleep(5); //sleep for a time as long as the "keep alive" intervel
         const char *b = "{\"cmd\": \"app_start\"}";
         ret = send(sockfd, b, strlen(b), 0);
         if (ret == -1){
