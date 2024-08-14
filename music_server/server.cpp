@@ -35,7 +35,7 @@ PlayerServer::~PlayerServer(){
 
 void PlayerServer::listener_cb(struct evconnlistener *listener, evutil_socket_t fd, struct sockaddr *addr, int socklen, void *arg){
     struct event_base *base = (struct event_base *)arg; 
-    std::cout << "Client is applying for connect" << fd << std::endl;
+    std::cout << "Client is applying for connect " << fd << std::endl;
 
     //create buffer event
     struct bufferevent *bev = bufferevent_socket_new(base, fd, BEV_OPT_CLOSE_ON_FREE);
@@ -61,8 +61,10 @@ void PlayerServer::read_cb(struct bufferevent *bev, void *ctx){
         return;
     }
 
+    char cmd[32] = {0};
+    strcpy(cmd, val["cmd"].asString().c_str());
     //parse message from app
-    if(!strcmp(val["cmd"].asString().c_str(), "bind")){ //received "bind" from app
+    if(!strcmp(cmd, "bind")){ //received "bind" from app
         Node n;
         n.app_bev = bev;
         strcpy(n.app_id, val["appid"].asString().c_str());
@@ -70,41 +72,41 @@ void PlayerServer::read_cb(struct bufferevent *bev, void *ctx){
         n.online_flag = 0;
         l->push_back(n);
     }
-    else if(!strcmp(val["cmd"].asString().c_str(), "app_start")){
-
+    else if(!strcmp(cmd, "app_start")){
+        p->player_operation(l, bev, cmd);
     }
-    else if(!strcmp(val["cmd"].asString().c_str(), "app_stop")){
-
+    else if(!strcmp(cmd, "app_stop")){
+        p->player_operation(l, bev, cmd);
     }
-    else if(!strcmp(val["cmd"].asString().c_str(), "app_suspend")){
-
+    else if(!strcmp(cmd, "app_suspend")){
+        p->player_operation(l, bev, cmd);
     }
-    else if(!strcmp(val["cmd"].asString().c_str(), "app_continue")){
-
+    else if(!strcmp(cmd, "app_continue")){
+        p->player_operation(l, bev, cmd);
     }
-    else if(!strcmp(val["cmd"].asString().c_str(), "app_prior")){
-
+    else if(!strcmp(cmd, "app_prior")){
+        p->player_operation(l, bev, cmd);
     }
-    else if(!strcmp(val["cmd"].asString().c_str(), "app_next")){
-
+    else if(!strcmp(cmd, "app_next")){
+        p->player_operation(l, bev, cmd);
     }
-    else if(!strcmp(val["cmd"].asString().c_str(), "app_volume_up")){
-
+    else if(!strcmp(cmd, "app_volume_up")){
+        p->player_operation(l, bev, cmd);
     }
-    else if(!strcmp(val["cmd"].asString().c_str(), "app_volume_down")){
-
+    else if(!strcmp(cmd, "app_volume_down")){
+        p->player_operation(l, bev, cmd);
     }
-    else if(!strcmp(val["cmd"].asString().c_str(), "app_sequence")){
-
+    else if(!strcmp(cmd, "app_sequence")){
+        p->player_operation(l, bev, cmd);
     }
-    else if(!strcmp(val["cmd"].asString().c_str(), "app_random")){
-
+    else if(!strcmp(cmd, "app_random")){
+        p->player_operation(l, bev, cmd);
     }
-    else if(!strcmp(val["cmd"].asString().c_str(), "app_circle")){
-
+    else if(!strcmp(cmd, "app_circle")){
+        p->player_operation(l, bev, cmd);
     }
-    else if(!strcmp(val["cmd"].asString().c_str(), "app_music")){
-
+    else if(!strcmp(cmd, "app_music")){
+    
     }
     //messages from music_player(client)
     else if(!strcmp(val["cmd"].asString().c_str(), "reply")){
@@ -112,7 +114,6 @@ void PlayerServer::read_cb(struct bufferevent *bev, void *ctx){
     }
     else if(!strcmp(val["cmd"].asString().c_str(), "info")){
         p->player_alive_info(l, bev, val);
-
     }
     else if(!strcmp(val["cmd"].asString().c_str(), "reply_status")){
 
@@ -120,11 +121,6 @@ void PlayerServer::read_cb(struct bufferevent *bev, void *ctx){
     else if(!strcmp(val["cmd"].asString().c_str(), "reply_music")){
 
     }
-
-
-
-
-    
 }
 
 void PlayerServer::event_cb(struct bufferevent *bev, short wait, void *ctx){

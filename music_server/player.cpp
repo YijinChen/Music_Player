@@ -9,11 +9,76 @@ void Player::player_alive_info(std::list<Node> *l, struct bufferevent *bev, Json
                 it->device_bev = bev;
                 it->online_flag = 1;
                 it->time = time(NULL);
-
                 std::cout << "received keep alive info, successfully updated info" << std::endl;
                 return;
             }
         }
     }
     std::cout << "received keep alive info, but the app is not binded yet" << std::endl;
+}
+
+void Player::player_operation(std::list<Node> *l, struct bufferevent *app_bev, const char* cmd){
+    Json::Value val;
+    if(!strcmp(cmd, "app_start")){
+        val["cmd"] = "start";
+    }
+    else if(!strcmp(cmd, "app_stop")){
+        val["cmd"] = "stop";
+    }
+    if(!strcmp(cmd, "app_start")){
+        val["cmd"] = "start";
+    }
+    else if(!strcmp(cmd, "app_suspend")){
+        val["cmd"] = "suspend";
+    }
+    if(!strcmp(cmd, "app_continue")){
+        val["cmd"] = "continue";
+    }
+    else if(!strcmp(cmd, "app_prior")){
+        val["cmd"] = "prior";
+    }
+    if(!strcmp(cmd, "app_next")){
+        val["cmd"] = "next";
+    }
+    else if(!strcmp(cmd, "app_voice_up")){
+        val["cmd"] = "voice_up";
+    }
+    if(!strcmp(cmd, "app_voice_down")){
+        val["cmd"] = "voice_down";
+    }
+    else if(!strcmp(cmd, "app_sequence")){
+        val["cmd"] = "sequence";
+    }
+        if(!strcmp(cmd, "app_random")){
+        val["cmd"] = "random";
+    }
+    else if(!strcmp(cmd, "app_circle")){
+        val["cmd"] = "circle";
+    }
+
+    std::string str = Json::FastWriter().write(val); //convert val to string
+    size_t ret;
+    //check list, check if the device is online
+    for (std::list<Node>::iterator it = l->begin(); it != l->end(); it++){
+        if (it->app_bev == app_bev){  //if the device exists
+            if(it->online_flag == 1){  //if the device is online
+                ret = bufferevent_write(it->device_bev, str.c_str(),strlen(str.c_str()));
+                if(ret < 0){
+                    std::cout << "bufferevent_write error\n";
+                }
+            }
+            else{   // if the device if offline
+                Json::Value v;
+                v["cmd"] = "app_reply";
+                v["result"] = "off_line";
+                std::string s = Json::FastWriter().write(v);
+                ret = bufferevent_write(app_bev, s.c_str(), strlen(s.c_str()));
+                if(ret < 0){
+                    std::cout << "bufferevent_write error\n";
+                }
+
+            }
+
+        }
+    }
 }

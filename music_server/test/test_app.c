@@ -19,7 +19,7 @@ int main(){
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = 8000;
     server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
-    int ret = connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr));
+    size_t ret = connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr));
     if(ret == -1){
         perror("connect");
         exit(1);
@@ -32,8 +32,12 @@ int main(){
             perror("send");
             exit(1);
         }
-        if(!strcmp(buf, "bye")){
-            break;
+        sleep(5); //sleep at least for a time as long as the "keep alive" intervel
+        const char *b = "{\"cmd\": \"app_start\"}";
+        ret = send(sockfd, b, strlen(b), 0);
+        if (ret == -1){
+            perror("send");
+            exit(1);
         }
         sleep(50000);
     }

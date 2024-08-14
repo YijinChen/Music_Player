@@ -6,6 +6,19 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <pthread.h>
+
+
+
+void *receive(void *arg){
+    int sockfd = *(int *)arg;
+    char buf[1024] = {0};
+    while(1){
+        memset(buf, 0, sizeof(buf));
+        int ret = recv(sockfd, buf, sizeof(buf), 0);
+        printf("%s\n", buf);
+    }
+}
 
 int main(){
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -24,6 +37,9 @@ int main(){
         perror("connect");
         exit(1);
     }
+
+    pthread_t tid;
+    pthread_create(&tid, NULL, receive, &sockfd);
 
     while(1){
         const char *buf = "{\"cmd\": \"info\", \"status\": \"alive\", \"deviceid\": \"001\"}";
