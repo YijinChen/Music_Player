@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <pthread.h>
 
-
+//gcc test_client.c -o test_client
 
 void *receive(void *arg){
     int sockfd = *(int *)arg;

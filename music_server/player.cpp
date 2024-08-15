@@ -1,13 +1,25 @@
 #include "player.h"
 
-void Player::player_alive_info(std::list<Node> *l, struct bufferevent *bev, Json::Value val){
+void Player::player_alive_info(std::list<Node> *l, struct bufferevent *bev, Json::Value val, struct event_base *base){
     for(std::list<Node>::iterator it = l->begin(); it != l->end(); it++){
         char deviceid[8] = {0};
         strcpy(deviceid, val["deviceid"].asString().c_str());
         for (std::list<Node>::iterator it = l->begin(); it != l->end(); it++){
             if(!strcmp(deviceid, it->device_id)){
+                if(it->online_flag == 0){    //It's the first time to send keep_alive                   
+                    //Set event parameter
+                    //EV_PERSIST: keep the event recycle
+                    std::cout << "Entering event_assgin ..\n";
+                    event_assign(it->timeout, base, -1, EV_PERSIST, timeout_cb, bev); 
+                    
+                    std::cout << "Finished event_assgin ..\n";
+                    struct timeval tv;
+                    evutil_timerclear(&tv);
+                    tv.tv_sec = 1; // run 1 time per 1 second
+                    event_add(it->timeout, &tv);
+                    it->online_flag = 1;
+                }
                 it->device_bev = bev;
-                it->online_flag = 1;
                 it->time = time(NULL);
                 std::cout << "received keep alive info, successfully updated info" << std::endl;
                 return;
@@ -111,4 +123,19 @@ void Player::player_reply_result(std::list<Node> *l, struct bufferevent *bev, Js
         }
     }
     std::cout << "app doesn't exist.\n";
+}
+
+
+void Player::timeout_cb(evutil_socket_t fd, short event, void *arg){
+    std::cout << "timer event\n";
+    struct bufferevent *bev = (struct bufferevent *)arg;
+    Json::Value val;
+    val["cmd"] = "get";
+    std::string str = Json::FastWriter().write(val);
+
+    size_t ret = bufferevent_write(bev, str.c_str(), strlen(str.c_str()));
+    if (ret < 0 ){
+        std::cout << "bufferevent_write error\n";
+    }
+
 }

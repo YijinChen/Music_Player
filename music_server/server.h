@@ -2,6 +2,7 @@
 #define SERVER_H
 #include <event2/event.h>
 #include <json/json.h>
+//#include <jsoncpp/json/json.h> //for ubuntu
 #include <list>
 #include <time.h>
 #include "player.h"

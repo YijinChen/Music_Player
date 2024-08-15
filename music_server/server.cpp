@@ -40,13 +40,16 @@ void PlayerServer::listener_cb(struct evconnlistener *listener, evutil_socket_t 
     //create buffer event
     struct bufferevent *bev = bufferevent_socket_new(base, fd, BEV_OPT_CLOSE_ON_FREE);
     if(bev == NULL){
-        std::cout << "bufferevent_socket_new error" << std::endl;
+        std::cout << "bufferevent_socket_new error\n";
     }
-    bufferevent_setcb(bev, read_cb, NULL, event_cb, NULL);
+    //here send base to read_cb, so that read_cb (static function) can use base (unstatic member variable)
+    bufferevent_setcb(bev, read_cb, NULL, event_cb, base);
     bufferevent_enable(bev, EV_READ);
 }
 
 void PlayerServer::read_cb(struct bufferevent *bev, void *ctx){
+    struct event_base *base = (struct event_base *)ctx;
+    
     char buf[1024] = {0};
     size_t ret = bufferevent_read(bev, buf, sizeof(buf));
     if(ret < 0){
@@ -136,7 +139,7 @@ void PlayerServer::read_cb(struct bufferevent *bev, void *ctx){
         p->player_reply_result(l, bev, val);
     }
     else if(!strcmp(cmd, "info")){
-        p->player_alive_info(l, bev, val);
+        p->player_alive_info(l, bev, val, base);
     }
     else if(!strcmp(cmd, "reply_status")){
         p->player_reply_result(l, bev, val);
@@ -148,7 +151,15 @@ void PlayerServer::read_cb(struct bufferevent *bev, void *ctx){
 
 void PlayerServer::event_cb(struct bufferevent *bev, short wait, void *ctx){
     if(wait & BEV_EVENT_EOF){
-        std::cout << "Client if off" << std::endl;
+        for(std::list<Node>::iterator it = l->begin(); it != l->end(); it++){
+            if (it->device_bev == bev){
+                std::cout << "music player is off\n";
+                it -> online_flag = 0;
+                event_del(it->timeout); //delete timer
+                return;
+            }
+        }
+        std::cout << "App if off" << std::endl;
     }
     else{
         std::cout << "unexpected error" << std::endl;

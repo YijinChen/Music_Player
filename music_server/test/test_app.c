@@ -9,6 +9,9 @@
 #include <pthread.h>
 #include <json-c/json.h>
 
+//gcc test_app.c -o test_app -ljson-c
+
+
 void *receive(void *arg){
     int sockfd = *(int *)arg;
     char buf[1024] = {0};
