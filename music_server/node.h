@@ -8,7 +8,8 @@ struct Node{
     struct bufferevent *device_bev;
     char app_id[8];
     char device_id[8];
-    int online_flag;  //if this device is online, 0-offline, 1-online
+    int online_flag;  //represents if this device is online, 0-offline, 1-online
+    int app_online_flag;  //represents if app is online, 0-offline, 1-online
     time_t time;  //time when received "keep alive" message
     struct event *timeout;  //use for peridically sending get_status info from app to client
 };

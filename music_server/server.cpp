@@ -73,6 +73,7 @@ void PlayerServer::read_cb(struct bufferevent *bev, void *ctx){
         strcpy(n.app_id, val["appid"].asString().c_str());
         strcpy(n.device_id, val["deviceid"].asString().c_str());
         n.online_flag = 0;
+        n.app_online_flag = 1;
         l->push_back(n);
     }
     else if(!strcmp(cmd, "search_bind")){
@@ -80,8 +81,9 @@ void PlayerServer::read_cb(struct bufferevent *bev, void *ctx){
         std::list<Node>::iterator it;
         for (it = l->begin(); it != l->end(); it++){
             if(!strcmp(it->app_id, val["appid"].asString().c_str())){
-                //update app_bev
+                //update app_bev and app_online_flag
                 it->app_bev = bev;
+                it->app_online_flag = 1;
                 //app_id exists
                 val["cmd"] = "reply_bind";
                 val["result"] = "yes";
@@ -158,8 +160,11 @@ void PlayerServer::event_cb(struct bufferevent *bev, short wait, void *ctx){
                 event_del(it->timeout); //delete timer
                 return;
             }
+            if(it->app_bev == bev){
+                std::cout << "App is off" << std::endl;
+                it->app_online_flag = 0;
+            }
         }
-        std::cout << "App if off" << std::endl;
     }
     else{
         std::cout << "unexpected error" << std::endl;

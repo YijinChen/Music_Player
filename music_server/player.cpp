@@ -1,4 +1,6 @@
 #include "player.h"
+#include <event2/event.h>
+
 
 void Player::player_alive_info(std::list<Node> *l, struct bufferevent *bev, Json::Value val, struct event_base *base){
     for(std::list<Node>::iterator it = l->begin(); it != l->end(); it++){
@@ -9,10 +11,8 @@ void Player::player_alive_info(std::list<Node> *l, struct bufferevent *bev, Json
                 if(it->online_flag == 0){    //It's the first time to send keep_alive                   
                     //Set event parameter
                     //EV_PERSIST: keep the event recycle
-                    std::cout << "Entering event_assgin ..\n";
+                    it->timeout = event_new(base, -1, EV_PERSIST, timeout_cb, bev);  //without event_new, event_assgn will lead to memory error
                     event_assign(it->timeout, base, -1, EV_PERSIST, timeout_cb, bev); 
-                    
-                    std::cout << "Finished event_assgin ..\n";
                     struct timeval tv;
                     evutil_timerclear(&tv);
                     tv.tv_sec = 1; // run 1 time per 1 second
@@ -112,14 +112,17 @@ void Player::player_reply_result(std::list<Node> *l, struct bufferevent *bev, Js
 
     std::string str = Json::FastWriter().write(val);
     size_t ret;
-    //check the list, find the bufferevent corrresponding to app
+    //check the list, find the bufferevent corrresponded to app
     for(std::list<Node>::iterator it = l->begin(); it != l->end(); it++){
         if(it->device_bev == bev){
-            ret = bufferevent_write(it->app_bev, str.c_str(), strlen(str.c_str()));
-            if(ret < 0){
+            if(it->app_online_flag == 1){    //If app is online, send message, else return
+                ret = bufferevent_write(it->app_bev, str.c_str(), strlen(str.c_str()));
+                if(ret < 0){
                 std::cout << "bufferevent_write error\n";
+                }
             }
             return;
+            
         }
     }
     std::cout << "app doesn't exist.\n";
