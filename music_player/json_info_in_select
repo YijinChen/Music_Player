@@ -2,6 +2,10 @@
 app: {"cmd": "bind", "appid": "101", "deviceid": "001"};
 server: {"cmd": "bind_sucess"};
 
+0. app check if it is already binded
+app: {"cmd": "search_bind", "appid": "101"};
+server: {"cmd": "reply_bind", "result": "yes"};  no
+
 1. keep alive
 client: ("cmd": "info", "status": "alive", "deviceid" : "001");
 
@@ -9,7 +13,7 @@ client: ("cmd": "info", "status": "alive", "deviceid" : "001");
 app: {"cmd": "app_start"};
 server to client: {"cmd": "start"};
 client: {"cmd": "reply", "result": "success"};
-server to app: {"cmd": "app_reply", "result": "success"};
+server to app: {"cmd": "app_reply", "result": "success"};    "result": "offline"
 
 3. stop playing
 app: {"cmd": "app_stop"};
@@ -80,7 +84,7 @@ server to app: {"cmd": "reply_status", "status": "start", "music": "xx.mp3", "vo
 app: {"cmd": "app_music"};
 server to client: {"cmd": "music"};
 client: {"cmd": "reply_music", "music": {[1.mp3], [2.mp3], [3.mp3]}};
-server to app: {"cmd": "reply_music", "music": {[1.mp3], [2.mp3], [3.mp3]}};
+server to app: {"cmd": "app_reply_music", "music": {[1.mp3], [2.mp3], [3.mp3]}};
 
 keys:
 start
