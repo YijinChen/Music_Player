@@ -18,7 +18,7 @@ PlayerServer::PlayerServer(const char *ip, int port){
     struct sockaddr_in server_addr;
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = port;
+    server_addr.sin_port = htons(port);
     server_addr.sin_addr.s_addr = inet_addr(ip);
     listener = evconnlistener_new_bind(base, listener_cb, base, LEV_OPT_CLOSE_ON_FREE | LEV_OPT_REUSEABLE, 10, (struct sockaddr *)&server_addr, sizeof(server_addr));
     if(listener == NULL){
@@ -75,6 +75,16 @@ void PlayerServer::read_cb(struct bufferevent *bev, void *ctx){
         n.online_flag = 0;
         n.app_online_flag = 1;
         l->push_back(n);
+
+        //reply to app
+        val["cmd"] = "bind_success";
+        //transfer value object to string
+        std::string str = Json::FastWriter().write(val);
+        size_t ret = bufferevent_write(bev, str.c_str(), strlen(str.c_str()));
+        if(ret < 0){
+            std::cout << "bufferevent_write error\n";
+        }
+
     }
     else if(!strcmp(cmd, "search_bind")){
         //check if app_id exists in the list
