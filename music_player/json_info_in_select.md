@@ -49,7 +49,7 @@ server to app: {"cmd": "app_reply", "result": "success"};
 app: {"cmd": "app_volume_up"};
 server to client: {"cmd": "volume_up"};
 client: {"cmd": "reply", "result": "success"};
-server to app: {"cmd": "app_reply", "result": "success"};
+server to app: {"cmd": "app_reply", "result": "success"};   result: off_line
 
 9. increase volume
 app: {"cmd": "app_volume_down"};
