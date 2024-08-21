@@ -10,12 +10,15 @@ CONFIG += c++17
 
 SOURCES += \
     main.cpp \
+    player.cpp \
     widget.cpp
 
 HEADERS += \
+    player.h \
     widget.h
 
 FORMS += \
+    player.ui \
     widget.ui
 
 # Default rules for deployment.

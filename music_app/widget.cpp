@@ -31,10 +31,6 @@ Widget::Widget(QWidget *parent)
     });
 
     connect(socket, &QTcpSocket::readyRead, this, &Widget::server_reply_slot);
-
-
-
-
 }
 
 Widget::~Widget()
@@ -63,7 +59,14 @@ void Widget::server_reply_slot(){
         QString result = obj.value("result").toString();
         if(result == "yes"){
             qDebug() << "this app_id is already bound";
+
+            //disconnect socket and widget __connect(socket, &QTcpSocket::readyRead, this, &Widget::server_reply_slot);
+            disconnect(socket, 0, this, 0);
+
             //skip to new page
+            Player *p = new Player(socket);
+            p->show();
+            this->close();
         }
         else if(result == "no"){
             qDebug() << "this app_id is not yet bound";
@@ -72,7 +75,14 @@ void Widget::server_reply_slot(){
     }
     else if(cmd == "bind_success"){
         qDebug() << "bind successfully";
+
+        //disconnect socket and widget __connect(socket, &QTcpSocket::readyRead, this, &Widget::server_reply_slot);
+        disconnect(socket, 0, this, 0);
+
         //skip to new page
+        Player *p = new Player(socket);
+        p->show();
+        this->close();
     }
 }
 
@@ -84,7 +94,7 @@ void Widget::bind_operation(){
     QJsonObject obj;
     obj.insert("cmd", "bind");
     obj.insert("appid", app_id);
-    obj.insert("devid", dev_id);
+    obj.insert("deviceid", dev_id);
 
     //transfer QJsonObject to QByteArray
     QByteArray ba = QJsonDocument(obj).toJson();

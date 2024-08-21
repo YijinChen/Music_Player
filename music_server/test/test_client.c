@@ -17,9 +17,63 @@ void *receive(void *arg){
         memset(buf, 0, sizeof(buf));
         int ret = recv(sockfd, buf, sizeof(buf), 0);
         printf("received info from server: %s\n", buf);
-        sleep(1);
-        const char *s = "{\"cmd\": \"reply\", \"result\": \"success\"}";
-        send(sockfd, s, strlen(s), 0);
+        // sleep(1);
+        // const char *s = "{\"cmd\": \"reply\", \"result\": \"success\"}";
+        // send(sockfd, s, strlen(s), 0);
+
+        struct json_object *obj = json_tokener_parse(buf);
+        struct json_object *json;
+        json_object_object_get_ex(obj, "cmd", &json);
+        if(!strcmp(json_object_get_string(json), "start")){
+                printf("received [start]\n");
+                const char *buf = "{\"cmd\": \"reply\", \"result\": \"start_success\"}";
+                ret = send(sockfd, buf, strlen(buf), 0);
+        }
+        else if(!strcmp(json_object_get_string(json), "suspend")){
+                printf("received [suspend]\n");
+                const char *buf = "{\"cmd\": \"reply\", \"result\": \"suspend_success\"}";
+                ret = send(sockfd, buf, strlen(buf), 0);
+        }
+        else if(!strcmp(json_object_get_string(json), "continue")){
+                printf("received [continue]\n");
+                const char *buf = "{\"cmd\": \"reply\", \"result\": \"continue_success\"}";
+                ret = send(sockfd, buf, strlen(buf), 0);
+        }
+        else if(!strcmp(json_object_get_string(json), "prior")){
+                printf("received [prior]\n");
+                const char *buf = "{\"cmd\": \"reply\", \"result\": \"prior_success\"}";
+                ret = send(sockfd, buf, strlen(buf), 0);
+        }
+        else if(!strcmp(json_object_get_string(json), "next")){
+                printf("received [next]\n");
+                const char *buf = "{\"cmd\": \"reply\", \"result\": \"next_success\"}";
+                ret = send(sockfd, buf, strlen(buf), 0);
+        }
+        else if(!strcmp(json_object_get_string(json), "volume_up")){
+                printf("received [volume_up]\n");
+                const char *buf = "{\"cmd\": \"reply\", \"result\": \"success\"}";
+                int ret = send(sockfd, buf, strlen(buf), 0);
+        }
+        else if(!strcmp(json_object_get_string(json), "volume_down")){
+                printf("received [volume_down]\n");
+                const char *buf = "{\"cmd\": \"reply\", \"result\": \"success\"}";
+                int ret = send(sockfd, buf, strlen(buf), 0);
+        }
+        else if(!strcmp(json_object_get_string(json), "sequence")){
+                printf("received [sequence]\n");
+                const char *buf = "{\"cmd\": \"reply\", \"result\": \"success\"}";
+                int ret = send(sockfd, buf, strlen(buf), 0);
+        }
+        else if(!strcmp(json_object_get_string(json), "random")){
+                printf("received [random]\n");
+                const char *buf = "{\"cmd\": \"reply\", \"result\": \"success\"}";
+                int ret = send(sockfd, buf, strlen(buf), 0);
+        }
+        else if(!strcmp(json_object_get_string(json), "circle")){
+                printf("received [circle]\n");
+                const char *buf = "{\"cmd\": \"reply\", \"result\": \"success\"}";
+                int ret = send(sockfd, buf, strlen(buf), 0);
+        }
     }
 }
 

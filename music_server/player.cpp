@@ -54,11 +54,11 @@ void Player::player_operation(std::list<Node> *l, struct bufferevent *app_bev, c
     if(!strcmp(cmd, "app_next")){
         val["cmd"] = "next";
     }
-    else if(!strcmp(cmd, "app_voice_up")){
-        val["cmd"] = "voice_up";
+    else if(!strcmp(cmd, "app_volume_up")){
+        val["cmd"] = "volume_up";
     }
-    if(!strcmp(cmd, "app_voice_down")){
-        val["cmd"] = "voice_down";
+    if(!strcmp(cmd, "app_volume_down")){
+        val["cmd"] = "volume_down";
     }
     else if(!strcmp(cmd, "app_sequence")){
         val["cmd"] = "sequence";

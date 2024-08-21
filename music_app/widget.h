@@ -7,6 +7,7 @@
 #include <QTimer>
 #include <QJsonObject>
 #include <QJsonDocument>
+#include "player.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
