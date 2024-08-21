@@ -74,6 +74,11 @@ void *receive(void *arg){
                 const char *buf = "{\"cmd\": \"reply\", \"result\": \"success\"}";
                 int ret = send(sockfd, buf, strlen(buf), 0);
         }
+        else if(!strcmp(json_object_get_string(json), "get")){
+                printf("received [get]\n");
+                const char *buf = "{\"cmd\": \"reply_status\", \"status\": \"start\", \"music\": \"x.mp3\", \"volume\": 30}";
+                int ret = send(sockfd, buf, strlen(buf), 0);
+        }
     }
 }
 

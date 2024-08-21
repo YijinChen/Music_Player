@@ -48,6 +48,25 @@ void Player::server_reply_slot(){
         }
     }
     else if(cmd  == "app_reply_status"){    //player status
+        //mode, music name, volume
+        QString status = obj.value("status").toString();
+        if(status == "start"){   //status of music player is "play"
+            if(play_flag == SUSPEND_PLAY){   //status of app is "suspend"
+                play_flag = START_PLAY;
+                ui->startButton->setText("||");
+            }
+        }
+        else if(status == "suspend" || status == "suspend"){ //status of music player is "stop" or "suspend"
+            if(play_flag == START_PLAY){   //status of app is "start"
+                play_flag = SUSPEND_PLAY;
+                ui->startButton->setText("|>");
+            }
+        }
+        QString music_name = obj.value("music").toString();
+        ui->curLabel->setText(music_name);
+
+        int level = obj.value("volume").toInt();
+        ui->volumeLabel->setText(QString::number(level));
 
     }
     else if (cmd == "app_rely_music"){    //get all music

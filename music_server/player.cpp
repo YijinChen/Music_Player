@@ -107,7 +107,7 @@ void Player::player_reply_result(std::list<Node> *l, struct bufferevent *bev, Js
         val["cmd"] = "app_reply_music";
     }
     else if (!strcmp(cmd, "reply_status")){
-        val["cmd"] = "app_reply";
+        val["cmd"] = "app_reply_status";
     }
 
     std::string str = Json::FastWriter().write(val);
@@ -122,7 +122,6 @@ void Player::player_reply_result(std::list<Node> *l, struct bufferevent *bev, Js
                 }
             }
             return;
-            
         }
     }
     std::cout << "app doesn't exist.\n";
@@ -140,5 +139,4 @@ void Player::timeout_cb(evutil_socket_t fd, short event, void *arg){
     if (ret < 0 ){
         std::cout << "bufferevent_write error\n";
     }
-
 }

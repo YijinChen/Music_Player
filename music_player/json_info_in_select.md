@@ -78,7 +78,7 @@ server to app: {"cmd": "app_reply", "result": "success"};
 13. get player status
 server: {"cmd": "get"};
 client: {"cmd": "reply_status", "status": "start", "music": "xx.mp3", "voice": "50"}; start suspend stop
-server to app: {"cmd": "reply_status", "status": "start", "music": "xx.mp3", "voice": "50"};
+server to app: {"cmd": "app_reply_status", "status": "start", "music": "xx.mp3", "voice": "50"};
 
 14. get music
 app: {"cmd": "app_music"};

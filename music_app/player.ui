@@ -153,19 +153,6 @@
     <string>volume -</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="priorButton_3">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>61</width>
-     <height>51</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>&lt;&lt;</string>
-   </property>
-  </widget>
   <widget class="QPushButton" name="priorButton_4">
    <property name="geometry">
     <rect>
@@ -179,7 +166,7 @@
     <string>volume +</string>
    </property>
   </widget>
-  <widget class="QLabel" name="voiceLabel">
+  <widget class="QLabel" name="volumeLabel">
    <property name="geometry">
     <rect>
      <x>470</x>
@@ -189,7 +176,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>TextLabel</string>
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;TextLabel&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </widget>
  </widget>
