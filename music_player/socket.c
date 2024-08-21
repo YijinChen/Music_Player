@@ -108,7 +108,7 @@ void socket_start_play(){
 
     struct json_object *json = json_object_new_object();
     json_object_object_add(json, "cmd", json_object_new_string("reply"));
-    json_object_object_add(json, "result", json_object_new_string("success"));
+    json_object_object_add(json, "result", json_object_new_string("start_success"));
 
     const char *buf = json_object_to_json_string(json);
     int ret = send(g_sockfd, buf, strlen(buf), 0);
@@ -122,7 +122,7 @@ void socket_stop_play(){
 
     struct json_object *json = json_object_new_object();
     json_object_object_add(json, "cmd", json_object_new_string("reply"));
-    json_object_object_add(json, "result", json_object_new_string("success"));
+    json_object_object_add(json, "result", json_object_new_string("stop_success"));
 
     const char *buf = json_object_to_json_string(json);
     int ret = send(g_sockfd, buf, strlen(buf), 0);
@@ -136,7 +136,7 @@ void socket_suspend_play(){
 
     struct json_object *json = json_object_new_object();
     json_object_object_add(json, "cmd", json_object_new_string("reply"));
-    json_object_object_add(json, "result", json_object_new_string("success"));
+    json_object_object_add(json, "result", json_object_new_string("suspend_success"));
 
     const char *buf = json_object_to_json_string(json);
     int ret = send(g_sockfd, buf, strlen(buf), 0);
@@ -150,7 +150,7 @@ void socket_continue_play(){
 
     struct json_object *json = json_object_new_object();
     json_object_object_add(json, "cmd", json_object_new_string("reply"));
-    json_object_object_add(json, "result", json_object_new_string("success"));
+    json_object_object_add(json, "result", json_object_new_string("continue_success"));
 
     const char *buf = json_object_to_json_string(json);
     int ret = send(g_sockfd, buf, strlen(buf), 0);

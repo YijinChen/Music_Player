@@ -132,9 +132,8 @@ void m_select(){
         }
         else if (FD_ISSET(g_buttonfd, &tmpfd)){
             //if data is sent by button
-            int id = get_key_id();
-            switch
-
+            //int id = get_key_id();
+            //switch
         }
         // else if(FD_ISSET(0, &tmpfd)){
         //     //use for testing on PC, data is sent by standard input   
@@ -179,6 +178,4 @@ void m_select(){
         // }
 
     }
-
-
 }

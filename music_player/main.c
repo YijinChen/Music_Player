@@ -8,6 +8,7 @@
 #include "select.h"
 #include <json-c/json.h>
 
+//gcc *.c -o main -ljson-c -lpthread
 
 
 int main(){

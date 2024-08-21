@@ -12,26 +12,26 @@ client: ("cmd": "info", "status": "alive", "deviceid" : "001");
 2. start to play
 app: {"cmd": "app_start"};
 server to client: {"cmd": "start"};
-client: {"cmd": "reply", "result": "success"};
-server to app: {"cmd": "app_reply", "result": "success"};    "result": "offline"
+client: {"cmd": "reply", "result": "start_success"};
+server to app: {"cmd": "app_reply", "result": "start_success"};    "result": "offline"
 
 3. stop playing
 app: {"cmd": "app_stop"};
 server to client: {"cmd": "stop"};
-client: {"cmd": "reply", "result": "success"};
-server to app: {"cmd": "app_reply", "result": "success"};
+client: {"cmd": "reply", "result": "stop_success"};
+server to app: {"cmd": "app_reply", "result": "stop_success"};
 
 4. suspend playing
 app: {"cmd": "app_suspend"};
 server to client: {"cmd": "suspend"};
-client: {"cmd": "reply", "result": "success"};
-server to app: {"cmd": "app_reply", "result": "success"};
+client: {"cmd": "reply", "result": "suspend_success"};
+server to app: {"cmd": "app_reply", "result": "suspend_success"};
 
 5. continue playing
 app: {"cmd": "app_continue"};
 server to client: {"cmd": "continue"};
-client: {"cmd": "reply", "result": "success"};
-server to app: {"cmd": "app_reply", "result": "success"};
+client: {"cmd": "reply", "result": "continue_success"};
+server to app: {"cmd": "app_reply", "result": "continue_success"};
 
 6. play prior one
 app: {"cmd": "app_prior"};
