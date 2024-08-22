@@ -6,6 +6,8 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QMessageBox>
+#include <QJsonArray>
+#include <QTimer>
 
 namespace Ui {
 class Player;
@@ -42,10 +44,13 @@ private slots: //slots function
 
     void on_circleButton_clicked();
 
+    void timeout_slot();
+
 private:
     Ui::Player *ui;
     QTcpSocket *socket;
     int play_flag;
+    QTimer timer;
 
 
 };

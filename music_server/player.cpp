@@ -69,6 +69,9 @@ void Player::player_operation(std::list<Node> *l, struct bufferevent *app_bev, c
     else if(!strcmp(cmd, "app_circle")){
         val["cmd"] = "circle";
     }
+    else if(!strcmp(cmd, "app_music")){
+        val["cmd"] = "music";
+    }
 
     std::string str = Json::FastWriter().write(val); //convert val to string
     size_t ret;

@@ -7,8 +7,9 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <json-c/json.h>
 
-//gcc test_client.c -o test_client
+//gcc test_client.c -o test_client -ljson-c
 
 void *receive(void *arg){
     int sockfd = *(int *)arg;
@@ -77,6 +78,11 @@ void *receive(void *arg){
         else if(!strcmp(json_object_get_string(json), "get")){
                 printf("received [get]\n");
                 const char *buf = "{\"cmd\": \"reply_status\", \"status\": \"start\", \"music\": \"x.mp3\", \"volume\": 30}";
+                int ret = send(sockfd, buf, strlen(buf), 0);
+        }
+        else if(!strcmp(json_object_get_string(json), "music")){
+                printf("received [music]\n");
+                const char *buf = "{\"cmd\": \"reply_music\", \"music\": [\"1.mp3\", \"2.mp3\", \"3.mp3\"]}";
                 int ret = send(sockfd, buf, strlen(buf), 0);
         }
     }

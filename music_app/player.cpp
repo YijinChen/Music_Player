@@ -17,11 +17,25 @@ Player::Player(QTcpSocket *s, QWidget *parent)
     connect(ui->randomButton, &QRadioButton::clicked, this, &Player::on_randomButton_clicked);
     connect(ui->circleButton, &QRadioButton::clicked, this, &Player::on_circleButton_clicked);
 
+
+    //set timer, send app_music after 5 seconds (So the server have enough time to update the status of player)
+    timer.start(5000);
+    connect(&timer, &QTimer::timeout, this, &Player::timeout_slot);
 }
 
 Player::~Player()
 {
     delete ui;
+}
+
+void Player::timeout_slot(){
+    //send app_music to server
+    QJsonObject obj;
+    obj.insert("cmd", "app_music");
+    QByteArray ba = QJsonDocument(obj).toJson();
+    socket->write(ba);
+
+    timer.stop(); //close the timer
 }
 
 void Player::server_reply_slot(){
@@ -69,8 +83,14 @@ void Player::server_reply_slot(){
         ui->volumeLabel->setText(QString::number(level));
 
     }
-    else if (cmd == "app_rely_music"){    //get all music
-
+    else if (cmd == "app_reply_music"){    //get all music
+        QJsonArray arr = obj.value("music").toArray();
+        QString result;
+        for (int i = 0; i < arr.count(); i++){
+            result.append(arr.at(i).toString());
+            result.append('\n');
+        }
+        ui->musicEdit->setText(result);
     }
 }
 
@@ -135,8 +155,6 @@ void Player::on_seqButton_clicked()
     QByteArray ba = QJsonDocument(obj).toJson();
     socket->write(ba);
 }
-
-
 
 void Player::on_randomButton_clicked()
 {
