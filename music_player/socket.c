@@ -28,7 +28,7 @@ void send_server(int sig){
     if(ret == -1){
         perror("send");
     }
-    alarm(5);
+    alarm(TIMEOUT);
 }
 
 void my_sleep(int seconds) {
@@ -70,7 +70,7 @@ void *connect_cb(void *arg){
         led_on(3);
 
         //after 5 seconds, send SIGALRM to process
-        alarm(5);
+        alarm(TIMEOUT);
         signal(SIGALRM, send_server);
 
         //sucessfully connect to server, add fd to set

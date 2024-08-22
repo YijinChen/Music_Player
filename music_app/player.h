@@ -8,6 +8,7 @@
 #include <QMessageBox>
 #include <QJsonArray>
 #include <QTimer>
+#include <QCloseEvent>
 
 namespace Ui {
 class Player;
@@ -23,6 +24,7 @@ class Player : public QWidget
 public:
     explicit Player(QTcpSocket *s, QWidget *parent = nullptr);
     ~Player();
+    void closeEvent(QCloseEvent *event);
 
 private slots: //slots function
     void server_reply_slot();

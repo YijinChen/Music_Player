@@ -146,6 +146,17 @@ void PlayerServer::read_cb(struct bufferevent *bev, void *ctx){
     else if(!strcmp(cmd, "app_music")){
         p->player_operation(l, bev, cmd);
     }
+    else if(!strcmp(cmd, "app_off_line")){
+        std::list<Node>::iterator it;
+        for(it = l->begin(); it != l->end(); it++){
+            if(it->app_bev == bev){
+                it->app_online_flag = 0;
+                bufferevent_free(it->app_bev);
+                std::cout << "APP is offline\n";
+                break;
+            }
+        }
+    }
     //messages from music_player(client)
     else if(!strcmp(cmd, "reply")){
         p->player_reply_result(l, bev, val);
@@ -165,15 +176,15 @@ void PlayerServer::event_cb(struct bufferevent *bev, short wait, void *ctx){
     if(wait & BEV_EVENT_EOF){
         for(std::list<Node>::iterator it = l->begin(); it != l->end(); it++){
             if (it->device_bev == bev){
-                std::cout << "music player is off\n";
+                std::cout << "music player is offline\n";
                 it -> online_flag = 0;
                 event_del(it->timeout); //delete timer
                 return;
             }
-            if(it->app_bev == bev){
-                std::cout << "App is off" << std::endl;
-                it->app_online_flag = 0;
-            }
+            // if(it->app_bev == bev){
+            //     std::cout << "App is off" << std::endl;
+            //     it->app_online_flag = 0;
+            // }
         }
     }
     else{

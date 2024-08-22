@@ -15,4 +15,10 @@ struct Node{
 };
 typedef struct Node Node;
 
+struct timeout_node{  //so we can transfer two parameters to event_assgin()
+    std::list<Node> *l;
+    char id[8];
+};
+typedef struct timeout_node tNode;
+
 #endif

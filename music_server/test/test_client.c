@@ -116,7 +116,7 @@ int main(){
             perror("send");
             exit(1);
         }
-        sleep(5);
+        sleep(1); //keep the same as TIMEOUT
     }
     close(sockfd);
 }

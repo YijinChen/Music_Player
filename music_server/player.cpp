@@ -11,8 +11,14 @@ void Player::player_alive_info(std::list<Node> *l, struct bufferevent *bev, Json
                 if(it->online_flag == 0){    //It's the first time to send keep_alive                   
                     //Set event parameter
                     //EV_PERSIST: keep the event recycle
-                    it->timeout = event_new(base, -1, EV_PERSIST, timeout_cb, bev);  //without event_new, event_assgn will lead to memory error
-                    event_assign(it->timeout, base, -1, EV_PERSIST, timeout_cb, bev); 
+
+                    //apply memory for t on heap, 
+                    tNode *t = new tNode;
+                    t->l = l;
+                    strcpy(t->id, deviceid);
+                    it->timeout = event_new(base, -1, EV_PERSIST, timeout_cb, t);  //without event_new, event_assgn will lead to memory error
+                    event_assign(it->timeout, base, -1, EV_PERSIST, timeout_cb, t); 
+                    
                     struct timeval tv;
                     evutil_timerclear(&tv);
                     tv.tv_sec = 1; // run 1 time per 1 second
@@ -133,13 +139,33 @@ void Player::player_reply_result(std::list<Node> *l, struct bufferevent *bev, Js
 
 void Player::timeout_cb(evutil_socket_t fd, short event, void *arg){
     std::cout << "timer event\n";
-    struct bufferevent *bev = (struct bufferevent *)arg;
+    //struct bufferevent *bev = (struct bufferevent *)arg;
+    tNode t;
+    memcpy(&t, arg, sizeof(tNode));
+
+    //check if the player online or not, according to the time interval of "alive" 
+    std::list<Node>::iterator it;
+    for (it = (t.l)->begin(); it != (t.l)->end(); it++){
+        if(!strcmp(it->device_id, t.id)){
+            if(time(NULL) - it->time > TIMEOUT){
+                it->online_flag = 0;
+            }
+            else{
+                it->online_flag = 1;
+            }
+            break;
+        }
+    }
+
+    //If the player and app are both online, send get_status
+    // if(it->app_online_flag == 1 && it->online_flag == 1){
     Json::Value val;
     val["cmd"] = "get";
     std::string str = Json::FastWriter().write(val);
 
-    size_t ret = bufferevent_write(bev, str.c_str(), strlen(str.c_str()));
+    size_t ret = bufferevent_write(it->device_bev, str.c_str(), strlen(str.c_str()));
     if (ret < 0 ){
         std::cout << "bufferevent_write error\n";
     }
+    //}
 }

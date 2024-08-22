@@ -12,6 +12,8 @@
 #include <iostream>
 #include <event2/util.h>
 
+#define TIMEOUT 1  //keep the same as TIMEOUT in music_player/sokect.h
+
 class Player{
     private:
 

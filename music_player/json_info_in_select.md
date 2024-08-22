@@ -87,6 +87,9 @@ client: {"cmd": "reply_music", "music": ["1.mp3", "2.mp3", "3.mp3"]};
 server to app: {"cmd": "app_reply_music", "music": ["1.mp3", "2.mp3", "3.mp3"]};
 (If the player is offline) server to app: {"cmd": "app_reply", "result": "off_line"};
 
+15. app offline
+app: {"cmd" : "app_off_line"};
+
 
 keys:
 start

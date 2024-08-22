@@ -46,15 +46,15 @@ void Player::server_reply_slot(){
     if(cmd == "app_reply"){         //player operation
         QString result = obj.value("result").toString();
         if(result == "start_success"){
-            ui->startButton->setText("||");  //If the player successfully played, change the \>(start) symbol to ||(suspend)
+            ui->startButton->setText("| |");  //If the player successfully played, change the \>(start) symbol to ||(suspend)
             play_flag = START_PLAY;
         }
         else if(result == "suspend_success"){
-            ui->startButton->setText("|>");
+            ui->startButton->setText("| >");
             play_flag = SUSPEND_PLAY;
         }
         else if(result == "continue_success"){
-            ui->startButton->setText("||");
+            ui->startButton->setText("| |");
             play_flag = START_PLAY;
         }
         else if(result == "off_line"){
@@ -171,5 +171,14 @@ void Player::on_circleButton_clicked()
     obj.insert("cmd", "app_circle");
     QByteArray ba = QJsonDocument(obj).toJson();
     socket->write(ba);
+}
+
+void Player::closeEvent(QCloseEvent *event){
+    QJsonObject obj;
+    obj.insert("cmd", "app_off_line");
+    QByteArray ba = QJsonDocument(obj).toJson();
+    socket->write(ba);
+    socket->waitForBytesWritten(); //wait for the socket finished writing then close the page
+    event->accept(); //close the page
 }
 

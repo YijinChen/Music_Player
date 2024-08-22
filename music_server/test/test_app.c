@@ -68,7 +68,7 @@ int main(){
     pthread_t tid; //use for receive info
     pthread_create(&tid, NULL, receive, &sockfd);
 
-    sleep(5); //sleep for a time as long as the "keep alive" intervel
+    sleep(1); //sleep for a time as long as the "keep alive" intervel
     const char *b = "{\"cmd\": \"app_start\"}";
     ret = send(sockfd, b, strlen(b), 0);
     if (ret == -1){
