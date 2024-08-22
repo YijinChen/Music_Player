@@ -10,11 +10,14 @@
 #include <json-c/json.h>
 
 //gcc test_client.c -o test_client -ljson-c
+#define PLAY 1
+#define NOT_PLAY 0
 
 void *receive(void *arg){
-    int sockfd = *(int *)arg;
-    char buf[1024] = {0};
-    while(1){
+        int play_flag = 0;
+        int sockfd = *(int *)arg;
+        char buf[1024] = {0};
+        while(1){
         memset(buf, 0, sizeof(buf));
         int ret = recv(sockfd, buf, sizeof(buf), 0);
         printf("received info from server: %s\n", buf);
@@ -27,16 +30,19 @@ void *receive(void *arg){
         json_object_object_get_ex(obj, "cmd", &json);
         if(!strcmp(json_object_get_string(json), "start")){
                 printf("received [start]\n");
+                play_flag = PLAY;
                 const char *buf = "{\"cmd\": \"reply\", \"result\": \"start_success\"}";
                 ret = send(sockfd, buf, strlen(buf), 0);
         }
         else if(!strcmp(json_object_get_string(json), "suspend")){
                 printf("received [suspend]\n");
+                play_flag = NOT_PLAY;
                 const char *buf = "{\"cmd\": \"reply\", \"result\": \"suspend_success\"}";
                 ret = send(sockfd, buf, strlen(buf), 0);
         }
         else if(!strcmp(json_object_get_string(json), "continue")){
                 printf("received [continue]\n");
+                play_flag = PLAY;
                 const char *buf = "{\"cmd\": \"reply\", \"result\": \"continue_success\"}";
                 ret = send(sockfd, buf, strlen(buf), 0);
         }
@@ -77,7 +83,12 @@ void *receive(void *arg){
         }
         else if(!strcmp(json_object_get_string(json), "get")){
                 printf("received [get]\n");
-                const char *buf = "{\"cmd\": \"reply_status\", \"status\": \"start\", \"music\": \"x.mp3\", \"volume\": 30}";
+                if(play_flag == PLAY){
+                        const char *buf = "{\"cmd\": \"reply_status\", \"status\": \"start\", \"music\": \"x.mp3\", \"volume\": 30}";
+                }
+                else if(play_flag == NOT_PLAY){
+                        const char *buf = "{\"cmd\": \"reply_status\", \"status\": \"suspend\", \"music\": \"x.mp3\", \"volume\": 30}";
+                }
                 int ret = send(sockfd, buf, strlen(buf), 0);
         }
         else if(!strcmp(json_object_get_string(json), "music")){

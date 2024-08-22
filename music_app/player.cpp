@@ -67,13 +67,13 @@ void Player::server_reply_slot(){
         if(status == "start"){   //status of music player is "play"
             if(play_flag == SUSPEND_PLAY){   //status of app is "suspend"
                 play_flag = START_PLAY;
-                ui->startButton->setText("||");
+                ui->startButton->setText("| |");
             }
         }
-        else if(status == "suspend" || status == "suspend"){ //status of music player is "stop" or "suspend"
+        else if(status == "suspend" || status == "stop"){ //status of music player is "stop" or "suspend"
             if(play_flag == START_PLAY){   //status of app is "start"
                 play_flag = SUSPEND_PLAY;
-                ui->startButton->setText("|>");
+                ui->startButton->setText("| >");
             }
         }
         QString music_name = obj.value("music").toString();
