@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "/Users/yijin/Documents/Cpp_Projects/Music_Player/music_player/test",
+      "program": "/Users/yijin/Documents/Cpp_Projects/Music_Player/music_player/test/build/Debug/outDebug"
+    }
+  ]
+}
