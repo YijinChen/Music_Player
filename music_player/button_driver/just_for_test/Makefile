@@ -7,10 +7,5 @@ clean:
 	make -C $(KERN_DIR) M=`pwd` modules clean
 	rm -rf modules.order
 
-# ab-y := a.o b.o
-# obj-m += ab.o
-
-
-
-obj-m += gpio_key_drv.o
+obj-m += test_drv.o
 
