@@ -6,6 +6,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <poll.h>
+#include <signal.h>
+
+static int fd;
 
 /*
  * ./button_test /dev/100ask_button0
@@ -13,11 +16,13 @@
  */
 int main(int argc, char **argv)
 {
-	int fd;
 	int val;
 	struct pollfd fds[1];
 	int timeout_ms = 5000;
 	int ret;
+	int	flags;
+
+	int i;
 	
 	/* 1. 判断参数 */
 	if (argc != 2) 
@@ -26,31 +31,32 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
+
 	/* 2. 打开文件 */
-	fd = open(argv[1], O_RDWR);
+	fd = open(argv[1], O_RDWR | O_NONBLOCK);
 	if (fd == -1)
 	{
 		printf("can not open file %s\n", argv[1]);
 		return -1;
 	}
 
-	fds[0].fd = fd;
-	fds[0].events = POLLIN;
-	
+	for (i = 0; i < 10; i++) 
+	{
+		if (read(fd, &val, 4) == 4)
+			printf("get button: 0x%x\n", val);
+		else
+			printf("get button: -1\n");
+	}
+
+	flags = fcntl(fd, F_GETFL);
+	fcntl(fd, F_SETFL, flags & ~O_NONBLOCK);
 
 	while (1)
 	{
-		/* 3. 读文件 */
-		ret = poll(fds, 1, timeout_ms);
-		if ((ret == 1) && (fds[0].revents & POLLIN))
-		{
-			read(fd, &val, 4);
-			printf("get button : 0x%x\n", val);
-		}
+		if (read(fd, &val, 4) == 4)
+			printf("get button: 0x%x\n", val);
 		else
-		{
-			printf("timeout\n");
-		}
+			printf("while get button: -1\n");
 	}
 	
 	close(fd);

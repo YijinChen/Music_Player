@@ -22,13 +22,15 @@
 #include <linux/interrupt.h>
 #include <linux/irq.h>
 #include <linux/slab.h>
-
+#include <linux/fcntl.h>
+#include <linux/timer.h>
 
 struct gpio_key{
 	int gpio;
 	struct gpio_desc *gpiod;
 	int flag;
 	int irq;
+	struct timer_list key_timer;
 } ;
 
 static struct gpio_key *gpio_keys_100ask;
@@ -41,6 +43,8 @@ static struct class *gpio_key_class;
 #define BUF_LEN 128
 static int g_keys[BUF_LEN];
 static int r, w;
+
+struct fasync_struct *button_fasync;
 
 #define NEXT_POS(x) ((x+1) % BUF_LEN)
 
@@ -77,17 +81,37 @@ static int get_key(void)
 
 static DECLARE_WAIT_QUEUE_HEAD(gpio_key_wait);
 
+static void key_timer_expire(unsigned long data)
+{
+	/* data ==> gpio */
+	struct gpio_key *gpio_key = (struct gpio_key *)data;
+	int val;
+	int key;
+
+	val = gpiod_get_value(gpio_key->gpiod);
+
+
+	printk("key_timer_expire key %d %d\n", gpio_key->gpio, val);
+	key = (gpio_key->gpio << 8) | val;
+	put_key(key);
+	wake_up_interruptible(&gpio_key_wait);
+	kill_fasync(&button_fasync, SIGIO, POLL_IN);
+}
+
+
 /* 实现对应的open/read/write等函数，填入file_operations结构体                   */
 static ssize_t gpio_key_drv_read (struct file *file, char __user *buf, size_t size, loff_t *offset)
 {
 	//printk("%s %s line %d\n", __FILE__, __FUNCTION__, __LINE__);
 	int err;
 	int key;
+
+	if (is_key_buf_empty() && (file->f_flags & O_NONBLOCK))
+		return -EAGAIN;
 	
 	wait_event_interruptible(gpio_key_wait, !is_key_buf_empty());
 	key = get_key();
 	err = copy_to_user(buf, &key, 4);
-	
 	return 4;
 }
 
@@ -98,29 +122,29 @@ static unsigned int gpio_key_drv_poll(struct file *fp, poll_table * wait)
 	return is_key_buf_empty() ? 0 : POLLIN | POLLRDNORM;
 }
 
+static int gpio_key_drv_fasync(int fd, struct file *file, int on)
+{
+	if (fasync_helper(fd, file, on, &button_fasync) >= 0)
+		return 0;
+	else
+		return -EIO;
+}
+
 
 /* 定义自己的file_operations结构体                                              */
 static struct file_operations gpio_key_drv = {
 	.owner	 = THIS_MODULE,
 	.read    = gpio_key_drv_read,
 	.poll    = gpio_key_drv_poll,
+	.fasync  = gpio_key_drv_fasync,
 };
 
 
 static irqreturn_t gpio_key_isr(int irq, void *dev_id)
 {
 	struct gpio_key *gpio_key = dev_id;
-	int val;
-	int key;
-	
-	val = gpiod_get_value(gpio_key->gpiod);
-	
-
-	printk("key %d %d\n", gpio_key->gpio, val);
-	key = (gpio_key->gpio << 8) | val;
-	put_key(key);
-	wake_up_interruptible(&gpio_key_wait);
-	
+	printk("gpio_key_isr key %d irq happened\n", gpio_key->gpio);
+	mod_timer(&gpio_key->key_timer, jiffies + HZ/5);
 	return IRQ_HANDLED;
 }
 
@@ -144,10 +168,13 @@ static int gpio_key_probe(struct platform_device *pdev)
 		printk("%s %s line %d, there isn't any gpio available\n", __FILE__, __FUNCTION__, __LINE__);
 		return -1;
 	}
+	else{
+		printk("count: %d\n", count);
+	}
 
 	gpio_keys_100ask = kzalloc(sizeof(struct gpio_key) * count, GFP_KERNEL);
 	for (i = 0; i < count; i++)
-	{
+	{		
 		gpio_keys_100ask[i].gpio = of_get_gpio_flags(node, i, &flag);
 		if (gpio_keys_100ask[i].gpio < 0)
 		{
@@ -157,6 +184,10 @@ static int gpio_key_probe(struct platform_device *pdev)
 		gpio_keys_100ask[i].gpiod = gpio_to_desc(gpio_keys_100ask[i].gpio);
 		gpio_keys_100ask[i].flag = flag & OF_GPIO_ACTIVE_LOW;
 		gpio_keys_100ask[i].irq  = gpio_to_irq(gpio_keys_100ask[i].gpio);
+
+		setup_timer(&gpio_keys_100ask[i].key_timer, key_timer_expire, (unsigned long)&gpio_keys_100ask[i]);
+		gpio_keys_100ask[i].key_timer.expires = ~0;
+		add_timer(&gpio_keys_100ask[i].key_timer);
 	}
 
 	for (i = 0; i < count; i++)
@@ -195,6 +226,7 @@ static int gpio_key_remove(struct platform_device *pdev)
 	for (i = 0; i < count; i++)
 	{
 		free_irq(gpio_keys_100ask[i].irq, &gpio_keys_100ask[i]);
+		del_timer(&gpio_keys_100ask[i].key_timer);
 	}
 	kfree(gpio_keys_100ask);
     return 0;

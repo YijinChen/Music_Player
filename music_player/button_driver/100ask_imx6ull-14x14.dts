@@ -108,7 +108,7 @@
 			 &gpio4 22 GPIO_ACTIVE_LOW>;
 		
         pinctrl-names = "default";
-        pinctrl-0 = <&key1_100ask &key2_100ask>;
+        pinctrl-0 = <&key1_100ask &key2_100ask &key3_100ask &key4_100ask &key5_100ask &key6_100ask>;
     };
 
     gpio-keys {
