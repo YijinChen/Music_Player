@@ -103,7 +103,7 @@ int main() {
             uint64_t expirations;
             read(tfd, &expirations, sizeof(expirations)); // Clear the event
             volume_toggle = !volume_toggle;
-            set_volume(mixer, "Master", volume_toggle ? 50 : 30);
+            set_volume(mixer, "Headphone", volume_toggle ? 50 : 30);
         }
     }
 

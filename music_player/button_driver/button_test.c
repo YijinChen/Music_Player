@@ -11,7 +11,7 @@
 static int fd;
 
 /*
- * ./button_test /dev/100ask_button0
+ * ./button_test /dev/100ask_gpio_key
  *
  */
 int main(int argc, char **argv)
@@ -21,6 +21,7 @@ int main(int argc, char **argv)
 	int timeout_ms = 5000;
 	int ret;
 	int	flags;
+	int gpio_num, gpio_state;
 
 	int i;
 	
@@ -40,25 +41,22 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
-	for (i = 0; i < 10; i++) 
-	{
-		if (read(fd, &val, 4) == 4)
-			printf("get button: 0x%x\n", val);
-		else
-			printf("get button: -1\n");
-	}
-
 	flags = fcntl(fd, F_GETFL);
 	fcntl(fd, F_SETFL, flags & ~O_NONBLOCK);
-
-	while (1)
-	{
-		if (read(fd, &val, 4) == 4)
-			printf("get button: 0x%x\n", val);
-		else
-			printf("while get button: -1\n");
-	}
 	
+    while (1)
+    {
+        /* 3. Read from the file */
+        read(fd, &val, sizeof(val));  // Read the full "key" (which includes both GPIO number and state)
+
+        /* 4. Extract GPIO number and state */
+        gpio_num = val >> 8;  // Extract the upper byte (GPIO number)
+        gpio_state = val & 0xFF;  // Extract the lower byte (GPIO state)
+
+        /* 5. Print the result */
+        printf("GPIO %d, State %d\n", gpio_num, gpio_state);
+    }
+
 	close(fd);
 	
 	return 0;

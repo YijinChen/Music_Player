@@ -4,7 +4,7 @@
 
 //#define MUSICPATH "/home/ubuntu/playground/Music_Player/music_list/" //for ubuntu
 ///usr/share/myir/Music
-#define MUSICPATH "/Users/yijin/Documents/Cpp_Projects/Music_Player/short_music_list/" //for mac
+#define MUSICPATH "/usr/share/myir/Music/" //for mac
 #define SHMKEY 0x1234
 #define SHMSIZE 4096
 void GetMusic();

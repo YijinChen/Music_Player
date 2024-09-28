@@ -35,11 +35,11 @@ struct gpio_key{
 
 static struct gpio_key *gpio_keys_100ask;
 
-/* 主设备号                                                                 */
+/* main device number                                                                 */
 static int major = 0;
 static struct class *gpio_key_class;
 
-/* 环形缓冲区 */
+/* loop buffer */
 #define BUF_LEN 128
 static int g_keys[BUF_LEN];
 static int r, w;
@@ -90,7 +90,6 @@ static void key_timer_expire(unsigned long data)
 
 	val = gpiod_get_value(gpio_key->gpiod);
 
-
 	printk("key_timer_expire key %d %d\n", gpio_key->gpio, val);
 	key = (gpio_key->gpio << 8) | val;
 	put_key(key);
@@ -99,7 +98,7 @@ static void key_timer_expire(unsigned long data)
 }
 
 
-/* 实现对应的open/read/write等函数，填入file_operations结构体                   */
+/* realize open/read/write functions，fill in file_operations struct                 */
 static ssize_t gpio_key_drv_read (struct file *file, char __user *buf, size_t size, loff_t *offset)
 {
 	//printk("%s %s line %d\n", __FILE__, __FUNCTION__, __LINE__);
@@ -131,7 +130,7 @@ static int gpio_key_drv_fasync(int fd, struct file *file, int on)
 }
 
 
-/* 定义自己的file_operations结构体                                              */
+/* define file_operations struct                                             */
 static struct file_operations gpio_key_drv = {
 	.owner	 = THIS_MODULE,
 	.read    = gpio_key_drv_read,
@@ -143,12 +142,12 @@ static struct file_operations gpio_key_drv = {
 static irqreturn_t gpio_key_isr(int irq, void *dev_id)
 {
 	struct gpio_key *gpio_key = dev_id;
-	printk("gpio_key_isr key %d irq happened\n", gpio_key->gpio);
+	//printk("gpio_key_isr key %d irq happened\n", gpio_key->gpio);
 	mod_timer(&gpio_key->key_timer, jiffies + HZ/5);
 	return IRQ_HANDLED;
 }
 
-/* 1. 从platform_device获得GPIO
+/* 1. get GPIO from 从platform_device
  * 2. gpio=>irq
  * 3. request_irq
  */
@@ -195,7 +194,7 @@ static int gpio_key_probe(struct platform_device *pdev)
 		err = request_irq(gpio_keys_100ask[i].irq, gpio_key_isr, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING, "100ask_gpio_key", &gpio_keys_100ask[i]);
 	}
 
-	/* 注册file_operations 	*/
+	/* register file_operations 	*/
 	major = register_chrdev(0, "100ask_gpio_key", &gpio_key_drv);  /* /dev/gpio_key */
 
 	gpio_key_class = class_create(THIS_MODULE, "100ask_gpio_key_class");
@@ -238,7 +237,7 @@ static const struct of_device_id ask100_keys[] = {
     { },
 };
 
-/* 1. 定义platform_driver */
+/* 1. define platform_driver */
 static struct platform_driver gpio_keys_driver = {
     .probe      = gpio_key_probe,
     .remove     = gpio_key_remove,
@@ -248,7 +247,7 @@ static struct platform_driver gpio_keys_driver = {
     },
 };
 
-/* 2. 在入口函数注册platform_driver */
+/* 2. register platform_driver in init function */
 static int __init gpio_key_init(void)
 {
     int err;
@@ -260,18 +259,13 @@ static int __init gpio_key_init(void)
 	return err;
 }
 
-/* 3. 有入口函数就应该有出口函数：卸载驱动程序时，就会去调用这个出口函数
- *     卸载platform_driver
- */
+/* 3. uninstall platform_driver in exit function */
 static void __exit gpio_key_exit(void)
 {
 	printk("%s %s line %d\n", __FILE__, __FUNCTION__, __LINE__);
 
     platform_driver_unregister(&gpio_keys_driver);
 }
-
-
-/* 7. 其他完善：提供设备信息，自动创建设备节点                                     */
 
 module_init(gpio_key_init);
 module_exit(gpio_key_exit);

@@ -92,4 +92,10 @@ app: {"cmd" : "app_off_line"};
 
 
 keys:
-start
+1.start/continue
+2.stop/suspend
+3.prior
+4.next
+5.volume up
+6.volume down
+7.change mode

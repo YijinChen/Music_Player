@@ -2,8 +2,8 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include "main.h"
-#include "select.h"
-#include "player.h"
+//#include "select.h"
+//#include "player.h"
 #include <poll.h>  //for "struct pollfd"
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -49,9 +49,9 @@ int InitDriver(){
     //     return FAILURE;
     // }
 
-    if(g_ledfd > g_maxfd){
-        g_maxfd = g_ledfd;
-    }
+    // if(g_ledfd > g_maxfd){
+    //     g_maxfd = g_ledfd;
+    // }
 
     return SUCCESS;
 }

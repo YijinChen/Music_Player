@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <sys/select.h>
 #include "player.h"
+#include "device.h"
 #include <json-c/json.h>
 #include <string.h>
 #include <sys/socket.h>
@@ -11,12 +12,12 @@
 // #include <sys/time.h>   // For struct timeval
 // #include <unistd.h>     // For close and other POSIX functions
 
-int g_buttonfd = 3;
+
 int g_sockfd = 3;
-int g_ledfd;
-int g_mixerfd; // control the voice volumn
+//int g_mixerfd; // control the voice volumn
 fd_set readfd;
 int g_maxfd = 0;
+
 
 // void parse_message(const char *m, char *c){
 //     struct json_object *obj = json_tokener_parse(m);
@@ -132,8 +133,28 @@ void m_select(){
         }
         else if (FD_ISSET(g_buttonfd, &tmpfd)){
             //if data is sent by button
-            //int id = get_key_id();
-            //switch
+            int id = get_key_id();
+            printf("get key id: %d\n", id);
+            switch(id){
+                case '1':  //start play
+                    start_play();
+                    break;
+                case '2': //stop play
+                    stop_play();
+                    break;
+                case '3': //suspend
+                    prior_play();
+                    break;
+                case '4': //continue
+                    next_play();
+                    break;
+                case '5': //play last music
+                    voice_up();
+                    break;
+                case '6':
+                    voice_down();
+                    break;
+            }
         }
         // else if(FD_ISSET(0, &tmpfd)){
         //     //use for testing on PC, data is sent by standard input   
