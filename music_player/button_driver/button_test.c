@@ -14,7 +14,7 @@ int main(int argc, char **argv)
 {
 	int fd;
 	int val;
-	int gpio_num, gpio_state;
+	int gpio_num, gpio_key;
 	
 	/* 1. 判断参数 */
 	if (argc != 2) 
@@ -38,11 +38,11 @@ int main(int argc, char **argv)
 
         /* 4. Extract GPIO number and state */
         gpio_num = val >> 8;  // Extract the upper byte (GPIO number)
-        gpio_state = val & 0xFF;  // Extract the lower byte (GPIO state)
+        gpio_key = val & 0xFF;  // Extract the lower byte (GPIO g_key)
 		//printf("GPIO %d, State %d\n", gpio_num, gpio_state);
 		int key = 0;
 
-		if (gpio_state == 0)
+		if (gpio_key == 1)
 		{
 			switch (gpio_num)
 			{
@@ -63,6 +63,32 @@ int main(int argc, char **argv)
 				break;
 			case 118:
 				key = 6;
+				break;
+			default:
+				break;
+			}
+		}
+		if (gpio_key == 2)
+		{
+			switch (gpio_num)
+			{
+			case 129:
+				key = 7;
+				break;
+			case 110:
+				key = 8;
+				break;
+			case 115:
+				key = 9;
+				break;
+			case 116:
+				key = 10;
+				break;
+			case 117:
+				key = 11;
+				break;
+			case 118:
+				key = 12;
 				break;
 			default:
 				break;

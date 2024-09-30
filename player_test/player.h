@@ -2,9 +2,8 @@
 #define PLAYER_H
 #include <unistd.h> //for pid_t
 
-//#define MUSICPATH "/home/ubuntu/playground/Music_Player/music_list/" //for ubuntu
-///usr/share/myir/Music
-#define MUSICPATH "/usr/share/myir/Music/" //for mac
+#define MUSICPATH "/usr/share/myir/Music/"
+#define MIXER_NAME "Headphone"
 #define SHMKEY 0x1234
 #define SHMSIZE 4096
 void GetMusic();
@@ -18,6 +17,9 @@ void next_play();
 void voice_up();
 void voice_down();
 void set_mode(int mode);
+int init_mixer();
+long get_volume();
+void set_volume(long volume_percent);
 
 #define SEQUENCEMODE    1
 #define RANDOMMODE      2
@@ -32,10 +34,11 @@ struct shm{
     pid_t grand_pid;
 };
 typedef struct shm shm;
-extern int iLeft;
+//extern int iLeft;
 extern int g_start_flag;
 extern int g_suspend_flag;
 extern void *g_addr;
+extern long current_volume;
 
 #endif
 

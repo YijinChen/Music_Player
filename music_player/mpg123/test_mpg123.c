@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <alsa/asoundlib.h>
+#include <unistd.h>
+#include <sys/wait.h>
 
 //arm-unknown-linux-gnueabihf-gcc -o test_mpg123 test_mpg123.c -lmpg123 -lasound
 
@@ -9,10 +11,33 @@
 
 // Function to play the music
 void play_music() {
-    char command[256];
-    snprintf(command, sizeof(command), "mpg123 -a hw:0,0 \"%s\" &", MUSIC_PATH);
-    printf("Executing command: %s\n", command);  // Debug print to verify the command
-    system(command);  // Play the music using mpg123 in the background
+    // char command[256];
+    // snprintf(command, sizeof(command), "mpg123 -a hw:0,0 \"%s\" &", MUSIC_PATH);
+    // printf("Executing command: %s\n", command);  // Debug print to verify the command
+    // system(command);  // Play the music using mpg123 in the background
+
+    //const char *music_path = "/usr/share/myir/Music";  // Set your actual music file path here
+    pid_t pid = fork();  // Create a new process
+
+    if (pid == -1) {
+        // Handle error in forking
+        perror("Failed to fork");
+        exit(EXIT_FAILURE);
+    }
+    else if (pid == 0) {
+        // In child process, execute mpg123
+        if (execl("/usr/bin/mpg123", "mpg123", MUSIC_PATH, NULL) == -1) {
+            perror("Failed to execute mpg123");
+            exit(EXIT_FAILURE);  // Exit with failure if execl fails
+        }
+    }
+    else{
+        // In parent process, continue doing other tasks or wait for child to finish
+        wait(NULL);  // Optionally, wait for the child process to finish
+        printf("Music playback finished.\n");
+    }
+
+    return;
 }
 
 // Function to stop the music

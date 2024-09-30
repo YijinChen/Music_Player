@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include "main.h"
 #include "device.h"
-//#include "socket.h"
+#include "socket.h"
 #include "link.h"
 #include <stdlib.h> // for exit()
 #include "player.h"
-//#include "select.h"
+#include "select.h"
 #include <json-c/json.h>
 
 //arm-unknown-linux-gnueabihf-gcc *.c -o main -ljson-c -lpthread -lmpg123 -lasound
@@ -22,13 +22,16 @@ int main(){
         printf("Succeed to initialize device files\n");
     }
 
-    // ret = InitSocket(); //initialize the network connection
-    // if(ret == FAILURE){
-    //     printf("fail to initialize network connection");
-    //     // if fail to connect, turn on 2 leds 
-    //     led_on(0);
-    //     led_on(1);
-    // }
+    ret = InitSocket(); //initialize the network connection
+    if(ret == FAILURE){
+        printf("fail to initialize network connection");
+        // if fail to connect, turn on 2 leds 
+        // led_on(0);
+        // led_on(1);
+    }
+    else{
+        printf("Succeed to initialize network connection\n");
+    }
 
     //initialize music list
     ret = InitLink();
@@ -51,7 +54,7 @@ int main(){
     }
 
     GetMusic();
-    // m_select();
+    m_select();
 
     return 0;
 }

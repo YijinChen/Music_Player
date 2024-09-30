@@ -153,11 +153,9 @@ void play_music(char *name){
                 }
 
                 if(strlen(name) != 0){ //when name is refered by function parameter, play the music
-                    printf("strlen(name)!= 0\n");
                     strcpy(cur_name, name);
                 }else{ //when name is emptyed by subprocess, find the next music, then play it
                     //judge play mode and fine next music
-                    printf("strlen(name)= 0\n");
                     memcpy(&s, addr, sizeof(s));
                     FindNextMusic(s.cur_name, s.play_mode, cur_name);
                 }
@@ -203,17 +201,17 @@ void start_play(){
         return;
     }
 
-    // Get the initial volume
-    init_mixer();
-    long volume;
-    volume = get_volume();
-    printf("Current volume: %ld%%\n", volume);
-
     //start to play music
     char name[128] = {0};
     strcpy(name, head->next->music_name);
     play_music(name);
     g_start_flag = 1;
+
+    // Get the initial volume
+    init_mixer();
+    long volume;
+    volume = get_volume();
+    printf("Current volume: %ld%%\n", volume);
 }
 
 void stop_play(){
