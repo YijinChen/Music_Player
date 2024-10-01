@@ -15,12 +15,16 @@
 #include <sys/ioctl.h>
 #include <alsa/asoundlib.h>
 //#include <linux/soundcard.h>
+#include <sys/types.h>
+#include <time.h>
+#include <termios.h>
 
 
 struct Node *head;
 void *g_addr = NULL; //map address for shared memory 
 int g_start_flag = 0; //if the player is playing music
 int g_suspend_flag = 0; //if the player suspend
+char suspend_name[64];
 
 //mixer
 snd_mixer_t *handle;
@@ -29,6 +33,12 @@ snd_mixer_elem_t *elem;
 long min_volume, max_volume;
 long current_volume;
 snd_mixer_selem_channel_id_t channel = SND_MIXER_SCHN_FRONT_LEFT;
+
+//for realizing suspend/continue function
+time_t start_time, suspend_time;
+//for avoiding terminal bug
+struct termios old_terminal_settings;
+
 
 //initialize shared memory
 int InitShm(){
@@ -120,22 +130,22 @@ void GetMusic(){
     }
 }
 
-void play_music(char *name){
+void play_music(char *name, int skip_frames){
     ShowLink();
-    printf("Current play: %s\n", name);
-    pid_t child_pid = fork();
-    if (child_pid == -1){
+    pid_t control_pid = fork();
+    if (control_pid == -1){
         perror("fork");
         exit(1);
     }
-    else if (child_pid == 0){ //create subprocess
-        while(1){
-            pid_t grand_pid = fork();
-            if(grand_pid == -1){
+    else if (control_pid == 0){ //create subprocess
+        //while(1){
+            pid_t music_pid = fork();
+            if(music_pid == -1){
                 perror("fork");
                 exit(1); // exit the subprocess
             }
-            else if (grand_pid == 0){ // create sub-subprocess
+            else if (music_pid == 0){ // create sub-subprocess
+                char skip_arg[20];
                 shm s;
                 char cur_name[64] = {0}; // name for the current music
                 //get shared memory
@@ -153,11 +163,8 @@ void play_music(char *name){
                 }
 
                 if(strlen(name) != 0){ //when name is refered by function parameter, play the music
-                    printf("strlen(name)!= 0\n");
                     strcpy(cur_name, name);
                 }else{ //when name is emptyed by subprocess, find the next music, then play it
-                    //judge play mode and fine next music
-                    printf("strlen(name)= 0\n");
                     memcpy(&s, addr, sizeof(s));
                     FindNextMusic(s.cur_name, s.play_mode, cur_name);
                 }
@@ -165,54 +172,58 @@ void play_music(char *name){
                 //write information into shared memory: all the process ids, current music name
                 memcpy(&s, addr, sizeof(s)); // read info from shared memory addr into s
                 strcpy(s.cur_name, name); // change some info of s
-                s.child_pid = getppid();
-                s.grand_pid = getpid();
+                s.control_pid = getppid();
+                s.music_pid = getpid();
                 memcpy(addr, &s, sizeof(s)); // write info back to shared memory addr from s
-                
+
                 shmdt(addr); //cancel the map
 
                 char music_path[128] = {0};
                 strcpy(music_path, MUSICPATH);
                 strcat(music_path, cur_name);
                 printf("Play Music: %s\n", music_path);
-                execl("/usr/bin/mpg123", "mpg123", music_path, NULL); 
+
+                sprintf(skip_arg, "-k %d", skip_frames);
+                execl("/usr/bin/mpg123", "mpg123", "-q", skip_arg, music_path, NULL);
             }
             else{ //create subprocess
-                //printf("before clear the name: %s\n", name);
                 memset(name, 0, strlen(name)); //empty the name, wait for next usage
-                //printf("clear the name\n");
-                
                 int status;
-                waitpid(grand_pid, &status, 0); //recycle sub-subprocess
+                waitpid(music_pid, &status, 0); //recycle sub-subprocess
             }
-        }
+        //}
     }
     else{
         return;
     }
-
 }
 
 void start_play(){
     if (g_start_flag == 1){ // if the player is playing
         return;
     }
-
     //Get music name
     if(head->next == NULL){ //if music list is empty
         return;
     }
-
     // Get the initial volume
     init_mixer();
     long volume;
     volume = get_volume();
     printf("Current volume: %ld%%\n", volume);
 
-    //start to play music
     char name[128] = {0};
     strcpy(name, head->next->music_name);
-    play_music(name);
+    start_time = time(NULL);  // Record start time when music starts
+
+    // Save current terminal settings and set cleanup on exit
+    tcgetattr(STDIN_FILENO, &old_terminal_settings);
+    atexit(restore_terminal_settings);
+    signal(SIGINT, handle_exit_signal);
+    signal(SIGTERM, handle_exit_signal);
+
+    //start to play music
+    play_music(name, 0); 
     g_start_flag = 1;
 }
 
@@ -226,8 +237,8 @@ void stop_play(){
     memset(&s, 0, sizeof(s));
     memcpy(&s, g_addr, sizeof(s));
 
-    kill(s.child_pid, SIGKILL);//kill subprocess
-    kill(s.grand_pid, SIGKILL);//kill sub-subprocess
+    kill(s.control_pid, SIGKILL);//kill subprocess
+    kill(s.music_pid, SIGKILL);//kill sub-subprocess
     snd_mixer_close(handle);//close mixer
 
     g_start_flag = 0;
@@ -237,15 +248,22 @@ void suspend_play(){
     if(g_start_flag == 0 || g_suspend_flag == 1){
         return;
     }
-
+    printf("Suspending music...\n");
     //read shared memory for pid    
     shm s;
     memset(&s, 0, sizeof(s));
     memcpy(&s, g_addr, sizeof(s));
+    strcpy(suspend_name, s.cur_name);
 
-    kill(s.child_pid, SIGSTOP);//suspend subprocess
-    kill(s.grand_pid, SIGSTOP);//suspend sub-subprocess
-    
+    // Attempt to suspend the subprocess
+    kill(s.control_pid, SIGSTOP);
+    // Attempt to suspend the sub-subprocess
+    if (kill(s.music_pid, SIGSTOP) == 0) {
+        //printf("Successfully suspended music_process (PID: %d)\n", s.music_pid);
+        suspend_time = time(NULL);  // Record the time when music was suspended
+    } else {
+        perror("Failed to suspend music\n");
+    }
     g_suspend_flag = 1;
 }
 
@@ -253,15 +271,26 @@ void continue_play(){
     if(g_start_flag == 0 || g_suspend_flag == 0){
         return;
     }
-
+    printf("Resuming music...\n");
     //read shared memory for pid    
     shm s;
     memset(&s, 0, sizeof(s));
     memcpy(&s, g_addr, sizeof(s));
 
-    kill(s.child_pid, SIGCONT);//suspend subprocess
-    kill(s.grand_pid, SIGCONT);//suspend sub-subprocess
-    
+    // Calculate the total time in seconds that the music played before suspension
+    int total_skip_seconds = difftime(suspend_time, start_time);
+
+    //continue control process
+    kill(s.control_pid, SIGCONT);
+    // Kill the old mpg123 process
+    kill(s.music_pid, SIGKILL);
+
+    // Convert total time into frames (approx. 38.28 frames per second)
+    double frame_rate = 38.25;
+    int skip_frames = (int)(total_skip_seconds * frame_rate);
+    // Start mpg123 again, skipping the calculated number of frames
+    play_music(suspend_name, skip_frames);
+
     g_suspend_flag = 0;
 }
 
@@ -275,13 +304,13 @@ void prior_play(){
     memset(&s, 0, sizeof(s));
     memcpy(&s, g_addr, sizeof(s));
 
-    kill(s.child_pid, SIGKILL);//kill subprocess
-    kill(s.grand_pid, SIGKILL);//kill sub-subprocess
+    kill(s.control_pid, SIGKILL);//kill subprocess
+    kill(s.music_pid, SIGKILL);//kill sub-subprocess
 
     g_start_flag = 0;
     char name[64] = {0};
     FindPriorMusic(s.cur_name, s.play_mode, name);
-    play_music(name);
+    play_music(name, 0);
 
     g_start_flag = 1;
 }
@@ -296,13 +325,13 @@ void next_play(){
     memset(&s, 0, sizeof(s));
     memcpy(&s, g_addr, sizeof(s));
 
-    kill(s.child_pid, SIGKILL);//kill subprocess
-    kill(s.grand_pid, SIGKILL);//kill sub-subprocess
+    kill(s.control_pid, SIGKILL);//kill subprocess
+    kill(s.music_pid, SIGKILL);//kill sub-subprocess
 
     g_start_flag = 0;
     char name[64] = {0};
     FindNextMusic(s.cur_name, s.play_mode, name);
-    play_music(name);
+    play_music(name, 0);
 
     g_start_flag = 1;
 }
@@ -389,5 +418,33 @@ void set_mode(int mode){
 
     s.play_mode = mode;
     memcpy(g_addr, &s, sizeof(s));
-    printf("successfully change mode to %d!\n", mode);
-;}
+    char mode_name[64];
+    switch(mode){
+        case 1:
+            strcpy(mode_name, "Sequance Mode");
+            break;
+        case 2:
+            strcpy(mode_name, "Random Mode");
+            break;
+        case 3:
+            strcpy(mode_name, "Circle Mode");
+            break;
+    }
+    printf("successfully change mode to %s!\n", mode_name);
+}
+
+void restore_terminal_settings() {
+    tcsetattr(STDIN_FILENO, TCSANOW, &old_terminal_settings);
+}
+
+void handle_exit_signal(int signum) {
+    shm s;
+    memset(&s, 0, sizeof(s));
+    memcpy(&s, g_addr, sizeof(s));
+    if (s.music_pid != 0) {
+        kill(s.music_pid, SIGKILL);
+    }
+    restore_terminal_settings();
+    printf("\nMusic player stopped due to signal %d. Exiting...\n", signum);
+    exit(0);
+}

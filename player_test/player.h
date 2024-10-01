@@ -20,6 +20,9 @@ void set_mode(int mode);
 int init_mixer();
 long get_volume();
 void set_volume(long volume_percent);
+void restore_terminal_settings();
+void handle_exit_signal(int signum);
+void play_music(char *name, int skip_frames);
 
 #define SEQUENCEMODE    1
 #define RANDOMMODE      2
@@ -30,8 +33,8 @@ struct shm{
     int play_mode;
     char cur_name[64];
     pid_t ppid;
-    pid_t child_pid;
-    pid_t grand_pid;
+    pid_t control_pid;
+    pid_t music_pid;
 };
 typedef struct shm shm;
 //extern int iLeft;
@@ -39,6 +42,7 @@ extern int g_start_flag;
 extern int g_suspend_flag;
 extern void *g_addr;
 extern long current_volume;
+
 
 #endif
 
