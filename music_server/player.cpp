@@ -83,14 +83,17 @@ void Player::player_operation(std::list<Node> *l, struct bufferevent *app_bev, c
     size_t ret;
     //check list, check if the device is online
     for (std::list<Node>::iterator it = l->begin(); it != l->end(); it++){
-        if (it->app_bev == app_bev){  //if the device exists
-            if(it->online_flag == 1){  //if the device is online
-                ret = bufferevent_write(it->device_bev, str.c_str(),strlen(str.c_str()));
+        if (it->app_bev == app_bev){ // if app exits
+            if(it->online_flag == 1){  //if the music player is online
+                std::cout << "music player is online\n";
+                std::cout << "str = " << str << "\n";
+                
+                ret = bufferevent_write(it->device_bev, str.c_str(), strlen(str.c_str()));
                 if(ret < 0){
                     std::cout << "bufferevent_write error\n";
                 }
             }
-            else{   // if the device if offline
+            else{   // if the music player if offline
                 Json::Value v;
                 v["cmd"] = "app_reply";
                 v["result"] = "off_line";
@@ -105,7 +108,7 @@ void Player::player_operation(std::list<Node> *l, struct bufferevent *app_bev, c
 }
 
 //server received reply from music_player, then the server will send info to app
-//bev is music_pkayer's bufferevent
+//bev is music_player's bufferevent
 void Player::player_reply_result(std::list<Node> *l, struct bufferevent *bev, Json::Value val){
     char cmd[32] = {0};
     strcpy(cmd, val["cmd"].asString().c_str());
@@ -113,6 +116,7 @@ void Player::player_reply_result(std::list<Node> *l, struct bufferevent *bev, Js
         val["cmd"] = "app_reply";
     }
     else if (!strcmp(cmd, "reply_music")){
+        printf("Received reply_music from music player\n");
         val["cmd"] = "app_reply_music";
     }
     else if (!strcmp(cmd, "reply_status")){
@@ -138,7 +142,6 @@ void Player::player_reply_result(std::list<Node> *l, struct bufferevent *bev, Js
 
 
 void Player::timeout_cb(evutil_socket_t fd, short event, void *arg){
-    std::cout << "timer event\n";
     //struct bufferevent *bev = (struct bufferevent *)arg;
     tNode t;
     memcpy(&t, arg, sizeof(tNode));

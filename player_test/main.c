@@ -31,6 +31,7 @@ int main(){
     }
     else{
         printf("Succeed to initialize network connection\n");
+        printf("g_sockfd = %d\n", g_sockfd);
     }
 
     //initialize music list

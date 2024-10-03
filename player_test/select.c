@@ -77,60 +77,68 @@ void m_select(){
             perror("select");
         }
 
-        // if (FD_ISSET(g_sockfd, &tmpfd)){
-        //     //if data is sent by tcp
-        //     memset(message, 0, sizeof(message));
-        //     ret = recv(g_sockfd, message, sizeof(message), 0);
-        //     if(ret == -1){
-        //         perror("recv");
-        //     }
+        if (FD_ISSET(g_sockfd, &tmpfd)){
+            //if data is sent by tcp
+            memset(message, 0, sizeof(message));
+            ret = recv(g_sockfd, message, sizeof(message), 0);
+            // if (ret == -1) {
+                // Some error occurred
+                //perror("recv");
+            // }
 
-        //     char cmd[128] = {0};
-        //     parse_message(message, cmd, sizeof(cmd));
-        //     printf("get message from socket: %s\n", cmd);
-            
+            char cmd[128] = {0};
+            if (ret > 0){
+                message[ret] = '\0';  // Null-terminate the received data
+                parse_message(message, cmd, sizeof(cmd));
+                printf("get message from socket: %s\n", cmd);
+            }
+            else if (ret == 0) {
+                printf("Connection closed by server.\n");
+            } else {
+                perror("recv");
+            }
 
-            // if(!strcmp(cmd, "start")){
-            //     socket_start_play();
-            // }
-            // else if(!strcmp(cmd, "stop")){
-            //     socket_stop_play();
-            // }
-            // else if(!strcmp(cmd, "suspend")){
-            //     socket_suspend_play();
-            // }
-            // else if(!strcmp(cmd, "continue")){
-            //     socket_continue_play();
-            // }
-            // else if(!strcmp(cmd, "prior")){
-            //     socket_prior_play();
-            // }
-            // else if(!strcmp(cmd, "next")){
-            //     socket_next_play();
-            // }
-            // else if(!strcmp(cmd, "volume_up")){
-            //     socket_volume_up_play();
-            // }
-            // else if(!strcmp(cmd, "volume_down")){
-            //     socket_volume_down_play();
-            // }
-            // else if(!strcmp(cmd, "sequence")){
-            //     socket_mode_play(SEQUENCEMODE);
-            // }
-            // else if(!strcmp(cmd, "random")){
-            //     socket_mode_play(RANDOMMODE);
-            // }
-            // else if(!strcmp(cmd, "circle")){
-            //     socket_mode_play(CIRCLEMODE);
-            // }
-            // else if(!strcmp(cmd, "get")){
-            //     printf("received get\n");
-            //     socket_get_status();
-            // }
-            // else if(!strcmp(cmd, "music")){
-            //     socket_get_music();
-            // }
-        // }
+            if(!strcmp(cmd, "start")){
+                socket_start_play();
+            }
+            else if(!strcmp(cmd, "stop")){
+                socket_stop_play();
+            }
+            else if(!strcmp(cmd, "suspend")){
+                socket_suspend_play();
+            }
+            else if(!strcmp(cmd, "continue")){
+                socket_continue_play();
+            }
+            else if(!strcmp(cmd, "prior")){
+                socket_prior_play();
+            }
+            else if(!strcmp(cmd, "next")){
+                socket_next_play();
+            }
+            else if(!strcmp(cmd, "volume_up")){
+                socket_volume_up_play();
+            }
+            else if(!strcmp(cmd, "volume_down")){
+                socket_volume_down_play();
+            }
+            else if(!strcmp(cmd, "sequence")){
+                socket_mode_play(SEQUENCEMODE);
+            }
+            else if(!strcmp(cmd, "random")){
+                socket_mode_play(RANDOMMODE);
+            }
+            else if(!strcmp(cmd, "circle")){
+                socket_mode_play(CIRCLEMODE);
+            }
+            else if(!strcmp(cmd, "get")){
+                printf("received get\n");
+                socket_get_status();
+            }
+            else if(!strcmp(cmd, "music")){
+                socket_get_music();
+            }
+        }
         else if (FD_ISSET(g_buttonfd, &tmpfd)){
             //if data is sent by button
             int id = get_key_id();

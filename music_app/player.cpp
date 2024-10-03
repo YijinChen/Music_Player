@@ -84,6 +84,7 @@ void Player::server_reply_slot(){
 
     }
     else if (cmd == "app_reply_music"){    //get all music
+        qDebug() << "Received app_reply_music....";
         QJsonArray arr = obj.value("music").toArray();
         QString result;
         for (int i = 0; i < arr.count(); i++){

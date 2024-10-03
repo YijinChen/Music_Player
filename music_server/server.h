@@ -1,15 +1,16 @@
 #ifndef SERVER_H
 #define SERVER_H
 #include <event2/event.h>
-#include <json/json.h>
-//#include <jsoncpp/json/json.h> //for ubuntu
+//#include <json/json.h>
+#include <jsoncpp/json/json.h> //for ubuntu
 #include <list>
 #include <time.h>
 #include "player.h"
 #include "node.h"
 
-#define IP "127.0.0.1"   //for macos
-//#define IP "172.31.47.86"  //for ubuntu
+//#define IP "127.0.0.1"   //for macos
+#define IP "172.31.47.86"  //for ubuntu
+//#define IP "0.0.0.0"
 #define PORT 8000
 
 class PlayerServer{

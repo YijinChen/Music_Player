@@ -21,9 +21,10 @@ PlayerServer::PlayerServer(const char *ip, int port){
     server_addr.sin_port = htons(port);
     server_addr.sin_addr.s_addr = inet_addr(ip);
     listener = evconnlistener_new_bind(base, listener_cb, base, LEV_OPT_CLOSE_ON_FREE | LEV_OPT_REUSEABLE, 10, (struct sockaddr *)&server_addr, sizeof(server_addr));
-    if(listener == NULL){
-        std::cout << "evconnlistener_new_bind error\n" << strerror(errno) << std::endl;
-    }
+if(listener == NULL){
+    std::cout << "evconnlistener_new_bind error\n" << strerror(errno) << std::endl;
+    return;  // Prevent further execution
+}
     event_base_dispatch(base);    //listen to the set
 }
 
@@ -144,6 +145,7 @@ void PlayerServer::read_cb(struct bufferevent *bev, void *ctx){
         p->player_operation(l, bev, cmd);
     }
     else if(!strcmp(cmd, "app_music")){
+        std::cout <<"Received app_music\n";
         p->player_operation(l, bev, cmd);
     }
     else if(!strcmp(cmd, "app_off_line")){
@@ -168,6 +170,7 @@ void PlayerServer::read_cb(struct bufferevent *bev, void *ctx){
         p->player_reply_result(l, bev, val);
     }
     else if(!strcmp(cmd, "reply_music")){
+        std::cout <<"Received reply_music from player\n";
         p->player_reply_result(l, bev, val);
     }
 }
@@ -181,10 +184,10 @@ void PlayerServer::event_cb(struct bufferevent *bev, short wait, void *ctx){
                 event_del(it->timeout); //delete timer
                 return;
             }
-            // if(it->app_bev == bev){
-            //     std::cout << "App is off" << std::endl;
-            //     it->app_online_flag = 0;
-            // }
+            if(it->app_bev == bev){
+                std::cout << "App is offline" << std::endl;
+                it->app_online_flag = 0;
+            }
         }
     }
     else{
