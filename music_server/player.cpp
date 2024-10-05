@@ -21,7 +21,7 @@ void Player::player_alive_info(std::list<Node> *l, struct bufferevent *bev, Json
                     
                     struct timeval tv;
                     evutil_timerclear(&tv);
-                    tv.tv_sec = 1; // run 1 time per 1 second
+                    tv.tv_sec = 3; // run 1 time per 1 second
                     event_add(it->timeout, &tv);
                     it->online_flag = 1;
                     std::cout << "Set online_flag to 1\n";
@@ -92,6 +92,9 @@ void Player::player_operation(std::list<Node> *l, struct bufferevent *app_bev, c
                 if(ret < 0){
                     std::cout << "bufferevent_write error\n";
                 }
+                unsigned long bev_state = bufferevent_get_enabled(it->device_bev);
+                std::cout << "Bufferevent state: " << bev_state << std::endl;
+
             }
             else{   // if the music player if offline
                 Json::Value v;
@@ -167,6 +170,7 @@ void Player::timeout_cb(evutil_socket_t fd, short event, void *arg){
         std::string str = Json::FastWriter().write(val);
 
         size_t ret = bufferevent_write(it->device_bev, str.c_str(), strlen(str.c_str()));
+        std::cout << "Sent message " << str << " to player\n";
         if (ret < 0 ){
             std::cout << "bufferevent_write error\n";
         }
