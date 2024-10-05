@@ -37,6 +37,10 @@ int InitDriver(){
         return FAILURE;
     }
 
+	// Set the button file descriptor to non-blocking mode
+    int flags = fcntl(g_buttonfd, F_GETFL, 0);
+    fcntl(g_buttonfd, F_SETFL, flags | O_NONBLOCK);
+
     //Open the led device file
     g_ledfd = open("/dev/myled", O_WRONLY);
     if (g_ledfd == -1){
@@ -66,9 +70,7 @@ int get_key_id(){
 	int val;
 	int gpio_num, gpio_key;
 
-	
-    while (1)
-    {
+    // while (1){
         /* 3. Read from the file */
         read(g_buttonfd, &val, sizeof(val));  // Read the full "key" (which includes both GPIO number and state)
 
@@ -136,5 +138,5 @@ int get_key_id(){
             //printf("Pressed button: %d\n", key);
             return key;
         }
-    }
+    //}
 }

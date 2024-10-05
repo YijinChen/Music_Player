@@ -26,5 +26,6 @@ void socket_get_music();
 extern int g_sockfd;
 extern fd_set readfd;
 extern int g_maxfd;
+extern int connect_flag;
 
 #endif

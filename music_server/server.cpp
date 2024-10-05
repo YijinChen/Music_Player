@@ -13,18 +13,18 @@ std::list<Node> *PlayerServer::l = new std::list<Node>();
 Player *PlayerServer::p = new Player(); 
 
 PlayerServer::PlayerServer(const char *ip, int port){
-    base = event_base_new();     //create set for events
+    base = event_base_new();//create set for events
 
     struct sockaddr_in server_addr;
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(port);
     server_addr.sin_addr.s_addr = inet_addr(ip);
-    listener = evconnlistener_new_bind(base, listener_cb, base, LEV_OPT_CLOSE_ON_FREE | LEV_OPT_REUSEABLE, 10, (struct sockaddr *)&server_addr, sizeof(server_addr));
-if(listener == NULL){
-    std::cout << "evconnlistener_new_bind error\n" << strerror(errno) << std::endl;
-    return;  // Prevent further execution
-}
+    listener = evconnlistener_new_bind(base, listener_cb, base, LEV_OPT_CLOSE_ON_FREE | LEV_OPT_REUSEABLE, -1, (struct sockaddr *)&server_addr, sizeof(server_addr)); //number 10 -> -1
+    if(listener == NULL){
+        std::cout << "evconnlistener_new_bind error\n" << strerror(errno) << std::endl;
+        return;  // Prevent further execution
+    }
     event_base_dispatch(base);    //listen to the set
 }
 
@@ -45,7 +45,9 @@ void PlayerServer::listener_cb(struct evconnlistener *listener, evutil_socket_t 
     }
     //here send base to read_cb, so that read_cb (static function) can use base (unstatic member variable)
     bufferevent_setcb(bev, read_cb, NULL, event_cb, base);
+    //bufferevent_setcb(bev, read_cb, NULL, event_cb, NULL);
     bufferevent_enable(bev, EV_READ);
+    //bufferevent_enable(bev, EV_WRITE); ///added code in debug
 }
 
 void PlayerServer::read_cb(struct bufferevent *bev, void *ctx){

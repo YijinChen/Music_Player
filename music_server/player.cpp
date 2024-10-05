@@ -24,6 +24,7 @@ void Player::player_alive_info(std::list<Node> *l, struct bufferevent *bev, Json
                     tv.tv_sec = 1; // run 1 time per 1 second
                     event_add(it->timeout, &tv);
                     it->online_flag = 1;
+                    std::cout << "Set online_flag to 1\n";
                 }
                 it->device_bev = bev;
                 it->time = time(NULL);
@@ -86,9 +87,8 @@ void Player::player_operation(std::list<Node> *l, struct bufferevent *app_bev, c
         if (it->app_bev == app_bev){ // if app exits
             if(it->online_flag == 1){  //if the music player is online
                 std::cout << "music player is online\n";
-                std::cout << "str = " << str << "\n";
-                
                 ret = bufferevent_write(it->device_bev, str.c_str(), strlen(str.c_str()));
+                std::cout << "Sent message " << str << " to player\n";
                 if(ret < 0){
                     std::cout << "bufferevent_write error\n";
                 }
@@ -161,14 +161,14 @@ void Player::timeout_cb(evutil_socket_t fd, short event, void *arg){
     }
 
     //If the player and app are both online, send get_status
-    // if(it->app_online_flag == 1 && it->online_flag == 1){
-    Json::Value val;
-    val["cmd"] = "get";
-    std::string str = Json::FastWriter().write(val);
+    if(it->app_online_flag == 1 && it->online_flag == 1){
+        Json::Value val;
+        val["cmd"] = "get";
+        std::string str = Json::FastWriter().write(val);
 
-    size_t ret = bufferevent_write(it->device_bev, str.c_str(), strlen(str.c_str()));
-    if (ret < 0 ){
-        std::cout << "bufferevent_write error\n";
+        size_t ret = bufferevent_write(it->device_bev, str.c_str(), strlen(str.c_str()));
+        if (ret < 0 ){
+            std::cout << "bufferevent_write error\n";
+        }
     }
-    //}
 }

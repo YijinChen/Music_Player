@@ -4,14 +4,8 @@
 #include <sys/types.h>
 #include "device.h"
 
-
-//extern int g_sockfd;
-
-//extern int g_mixerfd; // control the voice volumn
-
-//extern fd_set readfd;
-//extern int g_maxfd;
-
+extern fd_set tmpfd;
+void InitSelect();
 void m_select();
 
 #endif

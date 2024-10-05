@@ -12,20 +12,7 @@
 // #include <sys/time.h>   // For struct timeval
 // #include <unistd.h>     // For close and other POSIX functions
 
-
-//int g_sockfd = 3;
-//int g_mixerfd; // control the voice volumn
-//fd_set readfd;
-//int g_maxfd = 0;
-
-
-// void parse_message(const char *m, char *c){
-//     struct json_object *obj = json_tokener_parse(m);
-//     struct json_object *json;
-
-//     json_object_object_get_ex(obj, "cmd", &json);
-//     strcpy(c, json_object_get_string(json));
-// }
+fd_set tmpfd;
 
 void parse_message(const char *m, char *c, size_t len){
     struct json_object *obj = json_tokener_parse(m);
@@ -55,19 +42,17 @@ void show(){
 }
 
 
+void InitSelect()
+{
+	FD_ZERO(&readfd);
+	FD_ZERO(&tmpfd);
+	FD_SET(g_buttonfd, &readfd);
+}
+
 void m_select(){
     show();
-    fd_set tmpfd;
-    //int maxfd = (g_buttonfd > g_sockfd) ? g_buttonfd : g_sockfd;
-    //int maxfd = 3;
     int ret;
     char message[1024] = {0};
-    
-    FD_ZERO(&readfd);
-    FD_ZERO(&tmpfd);
-
-    FD_SET(g_buttonfd, &readfd);
-    FD_SET(g_sockfd, &readfd);
     //FD_SET(0, &readfd);    // add standard input into readfd
 
     while(1){
@@ -77,26 +62,22 @@ void m_select(){
             perror("select");
         }
 
-        if (FD_ISSET(g_sockfd, &tmpfd)){
+        if (connect_flag == 1 && FD_ISSET(g_sockfd, &tmpfd)){
             //if data is sent by tcp
             memset(message, 0, sizeof(message));
-            ret = recv(g_sockfd, message, sizeof(message), 0);
-            // if (ret == -1) {
-                // Some error occurred
-                //perror("recv");
-            // }
-
             char cmd[128] = {0};
-            if (ret > 0){
-                message[ret] = '\0';  // Null-terminate the received data
+            ret = recv(g_sockfd, message, sizeof(message), 0);
+            if(ret > 0){
                 parse_message(message, cmd, sizeof(cmd));
                 printf("get message from socket: %s\n", cmd);
             }
-            else if (ret == 0) {
-                printf("Connection closed by server.\n");
-            } else {
+            else if(ret == -1){
                 perror("recv");
             }
+            else{   //ret == 0
+                printf("connection stoped by server\n");
+                connect_flag = 0;
+            };
 
             if(!strcmp(cmd, "start")){
                 socket_start_play();
@@ -132,10 +113,10 @@ void m_select(){
                 socket_mode_play(CIRCLEMODE);
             }
             else if(!strcmp(cmd, "get")){
-                printf("received get\n");
                 socket_get_status();
             }
             else if(!strcmp(cmd, "music")){
+                printf("Received music\n");
                 socket_get_music();
             }
         }

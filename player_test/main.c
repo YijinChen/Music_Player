@@ -18,9 +18,10 @@ int main(){
         printf("Fail to initialize device files\n");
         exit(1);
     }
-    else{
-        printf("Succeed to initialize device files\n");
-    }
+    // else{
+    //     printf("Succeed to initialize device files\n");
+    // }
+    InitSelect();
 
     ret = InitSocket(); //initialize the network connection
     if(ret == FAILURE){
@@ -29,10 +30,9 @@ int main(){
         // led_on(0);
         // led_on(1);
     }
-    else{
-        printf("Succeed to initialize network connection\n");
-        printf("g_sockfd = %d\n", g_sockfd);
-    }
+    // else{
+    //     printf("Succeed to initialize network connection\n");
+    // }
 
     //initialize music list
     ret = InitLink();
@@ -40,9 +40,9 @@ int main(){
         printf("fail to initialize music list\n");
         exit(1);
     }
-    else{
-        printf("Succeed to initialize music list\n");
-    }
+    // else{
+    //     printf("Succeed to initialize music list\n");
+    // }
 
     //Initialize shared memory
     ret = InitShm();
@@ -50,9 +50,9 @@ int main(){
         printf("fail to initialize shared memory\n");
         exit(1);
     }
-    else{
-        printf("Succeed to initialize shared memory\n");
-    }
+    // else{
+    //     printf("Succeed to initialize shared memory\n");
+    // }
 
     GetMusic();
     m_select();
