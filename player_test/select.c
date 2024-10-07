@@ -80,7 +80,15 @@ void m_select(){
             };
 
             if(!strcmp(cmd, "start")){
-                socket_start_play();
+                //socket_start_play();
+                if(g_suspend_flag == 0){
+                    printf("Start play\n");
+                    socket_start_play();
+                }
+                else{
+                    printf("Continue play\n");
+                    socket_continue_play();
+                }
             }
             else if(!strcmp(cmd, "stop")){
                 socket_stop_play();
@@ -88,9 +96,9 @@ void m_select(){
             else if(!strcmp(cmd, "suspend")){
                 socket_suspend_play();
             }
-            else if(!strcmp(cmd, "continue")){
-                socket_continue_play();
-            }
+            // else if(!strcmp(cmd, "continue")){
+            //     socket_continue_play();
+            // }
             else if(!strcmp(cmd, "prior")){
                 socket_prior_play();
             }
