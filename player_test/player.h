@@ -43,6 +43,5 @@ extern int g_suspend_flag;
 extern void *g_addr;
 extern long current_volume;
 
-
 #endif
 

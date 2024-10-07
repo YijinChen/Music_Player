@@ -24,6 +24,7 @@ struct Node *head;
 void *g_addr = NULL; //map address for shared memory 
 int g_start_flag = 0; //if the player is playing music
 int g_suspend_flag = 0; //if the player suspend
+int init_mixer_flag = 0; //if the mixer successfully initalized
 char suspend_name[64];
 
 //mixer
@@ -375,11 +376,18 @@ int init_mixer(){
     snd_mixer_selem_get_playback_volume_range(elem, &min_volume, &max_volume);
     // initialize current_volume
     snd_mixer_selem_get_playback_volume(elem, channel, &current_volume);
+    init_mixer_flag = 1;
+    return 1;
 }
 
 // Function to get the current volume percent
 long get_volume() {
-    return (current_volume * 100) / max_volume;
+    if(init_mixer_flag == 1){
+        return (current_volume * 100) / max_volume;
+    }
+    else{
+        return 0;
+    }
 }
 
 // Function to set the volume

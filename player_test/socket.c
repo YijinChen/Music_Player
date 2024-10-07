@@ -261,7 +261,9 @@ void socket_get_status(){
     else if(g_start_flag == 0){
         json_object_object_add(json, "status", json_object_new_string("stop"));
     }
-    json_object_object_add(json, "voice", json_object_new_int64(current_volume));
+    long volume;
+    volume = get_volume();
+    json_object_object_add(json, "voice", json_object_new_int64(volume));
     
     shm s;
     // Ensure g_addr is not NULL
