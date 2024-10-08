@@ -139,60 +139,59 @@ void play_music(char *name, int skip_frames){
         exit(1);
     }
     else if (control_pid == 0){ //create subprocess
-        //while(1){
-            pid_t music_pid = fork();
-            if(music_pid == -1){
-                perror("fork");
-                exit(1); // exit the subprocess
+        pid_t music_pid = fork();
+        if(music_pid == -1){
+            perror("fork");
+            exit(1); // exit the subprocess
+        }
+        else if (music_pid == 0){ // create sub-subprocess
+            char skip_arg[20];
+            shm s;
+            char cur_name[64] = {0}; // name for the current music
+            //get shared memory
+            int shmid = shmget(SHMKEY, SHMSIZE, 0);
+            if(shmid == -1){
+                perror("shmget");
+                exit(1);
             }
-            else if (music_pid == 0){ // create sub-subprocess
-                char skip_arg[20];
-                shm s;
-                char cur_name[64] = {0}; // name for the current music
-                //get shared memory
-                int shmid = shmget(SHMKEY, SHMSIZE, 0);
-                if(shmid == -1){
-                    perror("shmget");
-                    exit(1);
-                }
 
-                //map
-                void *addr = shmat(shmid, NULL, 0);
-                if (addr == NULL){
-                    perror("shmat");
-                    exit(1);
-                }
-
-                if(strlen(name) != 0){ //when name is refered by function parameter, play the music
-                    strcpy(cur_name, name);
-                }else{ //when name is emptyed by subprocess, find the next music, then play it
-                    memcpy(&s, addr, sizeof(s));
-                    FindNextMusic(s.cur_name, s.play_mode, cur_name);
-                }
-
-                //write information into shared memory: all the process ids, current music name
-                memcpy(&s, addr, sizeof(s)); // read info from shared memory addr into s
-                strcpy(s.cur_name, name); // change some info of s
-                s.control_pid = getppid();
-                s.music_pid = getpid();
-                memcpy(addr, &s, sizeof(s)); // write info back to shared memory addr from s
-
-                shmdt(addr); //cancel the map
-
-                char music_path[128] = {0};
-                strcpy(music_path, MUSICPATH);
-                strcat(music_path, cur_name);
-                printf("Play Music: %s\n", music_path);
-
-                sprintf(skip_arg, "-k %d", skip_frames);
-                execl("/usr/bin/mpg123", "mpg123", "-q", skip_arg, music_path, NULL);
+            //map
+            void *addr = shmat(shmid, NULL, 0);
+            if (addr == NULL){
+                perror("shmat");
+                exit(1);
             }
-            else{ //create subprocess
-                memset(name, 0, strlen(name)); //empty the name, wait for next usage
-                int status;
-                waitpid(music_pid, &status, 0); //recycle sub-subprocess
+
+            if(strlen(name) != 0){ //when name is refered by function parameter, play the music
+                strcpy(cur_name, name);
+            }else{ //when name is emptyed by subprocess, find the next music, then play it
+                memcpy(&s, addr, sizeof(s));
+                FindNextMusic(s.cur_name, s.play_mode, cur_name);
             }
-        //}
+
+            //write information into shared memory: all the process ids, current music name
+            memcpy(&s, addr, sizeof(s)); // read info from shared memory addr into s
+            strcpy(s.cur_name, name); // change some info of s
+            s.control_pid = getppid();
+            s.music_pid = getpid();
+            memcpy(addr, &s, sizeof(s)); // write info back to shared memory addr from s
+
+            shmdt(addr); //cancel the map
+
+            char music_path[128] = {0};
+            strcpy(music_path, MUSICPATH);
+            strcat(music_path, cur_name);
+            printf("Play Music: %s\n", music_path);
+
+            sprintf(skip_arg, "-k %d", skip_frames);
+            execl("/usr/bin/mpg123", "mpg123", "-q", skip_arg, music_path, NULL);
+        }
+        else{ //create subprocess
+            memset(name, 0, strlen(name)); //empty the name, wait for next usage
+            int status;
+            waitpid(music_pid, &status, 0); //recycle sub-subprocess
+        }
+        return;
     }
     else{
         return;

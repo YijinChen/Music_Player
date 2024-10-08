@@ -48,6 +48,10 @@ void Player::server_reply_slot(){
         if(result == "start_success"){
             ui->startButton->setText("| |");  //If the player successfully played, change the \>(start) symbol to ||(suspend)
             play_flag = START_PLAY;
+            QString music_name = obj.value("music").toString();
+            ui->curLabel->setText(music_name);
+            int level = obj.value("voice").toInt();
+            ui->volumeLabel->setText(QString::number(level) + "%");
         }
         else if(result == "suspend_success"){
             ui->startButton->setText("| >");
@@ -57,6 +61,14 @@ void Player::server_reply_slot(){
             ui->startButton->setText("| |");
             play_flag = START_PLAY;
         }
+        else if(result == "volume_success"){
+            int level = obj.value("voice").toInt();
+            ui->volumeLabel->setText(QString::number(level) + "%");
+        }
+        // else if(result == "prior_success"){
+        //     QString music_name = obj.value("music").toString();
+        //     ui->curLabel->setText(music_name);
+        // }
         else if(result == "off_line"){
             QMessageBox::warning(this, "operation message", "music player is offline");
         }
@@ -79,8 +91,8 @@ void Player::server_reply_slot(){
         QString music_name = obj.value("music").toString();
         ui->curLabel->setText(music_name);
 
-        int level = obj.value("volume").toInt();
-        ui->volumeLabel->setText(QString::number(level));
+        int level = obj.value("voice").toInt();
+        ui->volumeLabel->setText(QString::number(level) + "%");
 
     }
     else if (cmd == "app_reply_music"){    //get all music
@@ -102,12 +114,14 @@ void Player::on_startButton_clicked()
         obj.insert("cmd", "app_start");
         QByteArray ba = QJsonDocument(obj).toJson();
         socket->write(ba);
+        ui->startButton->setText("| |");
     }
     else if(play_flag == START_PLAY){
         QJsonObject obj;
         obj.insert("cmd", "app_suspend");
         QByteArray ba = QJsonDocument(obj).toJson();
         socket->write(ba);
+        ui->startButton->setText("| >");
     }
 }
 

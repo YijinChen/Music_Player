@@ -161,7 +161,7 @@ void PlayerServer::read_cb(struct bufferevent *bev, void *ctx){
             }
         }
     }
-    //messages from music_player(client)
+    //messages from music_player
     else if(!strcmp(cmd, "reply")){
         p->player_reply_result(l, bev, val);
     }
@@ -169,6 +169,7 @@ void PlayerServer::read_cb(struct bufferevent *bev, void *ctx){
         p->player_alive_info(l, bev, val, base);
     }
     else if(!strcmp(cmd, "reply_status")){
+        std::cout << "received status\n";
         p->player_reply_result(l, bev, val);
     }
     else if(!strcmp(cmd, "reply_music")){

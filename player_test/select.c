@@ -52,7 +52,7 @@ void InitSelect()
 void m_select(){
     show();
     int ret;
-    char message[1024] = {0};
+    char message[3072] = {0};
     //FD_SET(0, &readfd);    // add standard input into readfd
 
     while(1){
@@ -83,7 +83,7 @@ void m_select(){
                 //socket_start_play();
                 if(g_suspend_flag == 0){
                     printf("Start play\n");
-                    socket_start_play();
+                    socket_start_play(socket_get_status);
                 }
                 else{
                     printf("Continue play\n");
@@ -124,7 +124,6 @@ void m_select(){
                 socket_get_status();
             }
             else if(!strcmp(cmd, "music")){
-                printf("Received music\n");
                 socket_get_music();
             }
         }

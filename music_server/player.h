@@ -25,4 +25,6 @@ class Player{
     static void timeout_cb(evutil_socket_t fd, short event, void *arg);
 };
 
+void send_to_device(struct bufferevent *bev, std::string str);
+
 #endif

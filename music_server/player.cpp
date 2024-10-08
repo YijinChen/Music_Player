@@ -1,6 +1,8 @@
 #include "player.h"
 #include <event2/event.h>
-
+#include <mutex>
+#include <queue>
+#include <string>
 
 void Player::player_alive_info(std::list<Node> *l, struct bufferevent *bev, Json::Value val, struct event_base *base){
     for(std::list<Node>::iterator it = l->begin(); it != l->end(); it++){
@@ -86,15 +88,10 @@ void Player::player_operation(std::list<Node> *l, struct bufferevent *app_bev, c
     for (std::list<Node>::iterator it = l->begin(); it != l->end(); it++){
         if (it->app_bev == app_bev){ // if app exits
             if(it->online_flag == 1){  //if the music player is online
-                std::cout << "music player is online\n";
                 ret = bufferevent_write(it->device_bev, str.c_str(), strlen(str.c_str()));
-                std::cout << "Sent message " << str << " to player\n";
                 if(ret < 0){
                     std::cout << "bufferevent_write error\n";
                 }
-                unsigned long bev_state = bufferevent_get_enabled(it->device_bev);
-                std::cout << "Bufferevent state: " << bev_state << std::endl;
-
             }
             else{   // if the music player if offline
                 Json::Value v;
@@ -119,7 +116,6 @@ void Player::player_reply_result(std::list<Node> *l, struct bufferevent *bev, Js
         val["cmd"] = "app_reply";
     }
     else if (!strcmp(cmd, "reply_music")){
-        printf("Received reply_music from music player\n");
         val["cmd"] = "app_reply_music";
     }
     else if (!strcmp(cmd, "reply_status")){
@@ -133,6 +129,7 @@ void Player::player_reply_result(std::list<Node> *l, struct bufferevent *bev, Js
         if(it->device_bev == bev){
             if(it->app_online_flag == 1){    //If app is online, send message, else return
                 ret = bufferevent_write(it->app_bev, str.c_str(), strlen(str.c_str()));
+                std::cout << "send to app: " << str;
                 if(ret < 0){
                 std::cout << "bufferevent_write error\n";
                 }
@@ -168,11 +165,11 @@ void Player::timeout_cb(evutil_socket_t fd, short event, void *arg){
         Json::Value val;
         val["cmd"] = "get";
         std::string str = Json::FastWriter().write(val);
-
+    
         size_t ret = bufferevent_write(it->device_bev, str.c_str(), strlen(str.c_str()));
-        std::cout << "Sent message " << str << " to player\n";
         if (ret < 0 ){
             std::cout << "bufferevent_write error\n";
         }
     }
 }
+

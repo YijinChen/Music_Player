@@ -28,7 +28,6 @@ class PlayerServer{
     public:
     PlayerServer(const char *ip = IP, int port = PORT);
     ~PlayerServer();
-
 };
 
 
