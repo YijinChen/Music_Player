@@ -12,6 +12,7 @@
 #include <errno.h>
 #include <signal.h> //for kill()
 //#include "select.h"
+#include "socket.h"
 #include <sys/ioctl.h>
 #include <alsa/asoundlib.h>
 //#include <linux/soundcard.h>
@@ -181,8 +182,8 @@ void play_music(char *name, int skip_frames){
             char music_path[128] = {0};
             strcpy(music_path, MUSICPATH);
             strcat(music_path, cur_name);
-            printf("Play Music: %s\n", music_path);
 
+            printf("Play Music: %s\n", music_path);
             sprintf(skip_arg, "-k %d", skip_frames);
             execl("/usr/bin/mpg123", "mpg123", "-q", skip_arg, music_path, NULL);
         }
@@ -198,7 +199,7 @@ void play_music(char *name, int skip_frames){
     }
 }
 
-void start_play(){
+void start_play(char *name){
     if (g_start_flag == 1){ // if the player is playing
         return;
     }
@@ -212,7 +213,7 @@ void start_play(){
     volume = get_volume();
     printf("Current volume: %ld%%\n", volume);
 
-    char name[128] = {0};
+    //char name[128] = {0};
     strcpy(name, head->next->music_name);
     start_time = time(NULL);  // Record start time when music starts
 
@@ -294,7 +295,7 @@ void continue_play(){
     g_suspend_flag = 0;
 }
 
-void prior_play(){
+void prior_play(char *name){
     if(g_start_flag == 0){
         return;
     }
@@ -308,14 +309,14 @@ void prior_play(){
     kill(s.music_pid, SIGKILL);//kill sub-subprocess
 
     g_start_flag = 0;
-    char name[64] = {0};
+    //char name[64] = {0};
     FindPriorMusic(s.cur_name, s.play_mode, name);
     play_music(name, 0);
 
     g_start_flag = 1;
 }
 
-void next_play(){
+void next_play(char *name){
     if(g_start_flag == 0){
         return;
     }
@@ -329,7 +330,7 @@ void next_play(){
     kill(s.music_pid, SIGKILL);//kill sub-subprocess
 
     g_start_flag = 0;
-    char name[64] = {0};
+    //char name[64] = {0};
     FindNextMusic(s.cur_name, s.play_mode, name);
     play_music(name, 0);
 

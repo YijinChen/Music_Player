@@ -38,13 +38,13 @@ server to app: {"cmd": "app_reply", "result": "continue_success"};
 app: {"cmd": "app_prior"};
 server to client: {"cmd": "prior"};
 client: {"cmd": "reply", "result": "success"};
-server to app: {"cmd": "app_reply", "result": "success"};
+server to app: {"cmd": "app_reply", "result": "prior_success", "music": "xx.mp3"};
 
 7. play next one
 app: {"cmd": "app_next"};
 server to client: {"cmd": "next"};
 client: {"cmd": "reply", "result": "success"};
-server to app: {"cmd": "app_reply", "result": "success"};
+server to app: {"cmd": "app_reply", "result": "next_success", "music": "xx.mp3"};
 
 8. increase volume
 app: {"cmd": "app_volume_up"};

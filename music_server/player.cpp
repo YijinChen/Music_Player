@@ -23,7 +23,7 @@ void Player::player_alive_info(std::list<Node> *l, struct bufferevent *bev, Json
                     
                     struct timeval tv;
                     evutil_timerclear(&tv);
-                    tv.tv_sec = 3; // run 1 time per 1 second
+                    tv.tv_sec = 10; // run 1 time per 1 second
                     event_add(it->timeout, &tv);
                     it->online_flag = 1;
                     std::cout << "Set online_flag to 1\n";
@@ -47,9 +47,6 @@ void Player::player_operation(std::list<Node> *l, struct bufferevent *app_bev, c
     }
     else if(!strcmp(cmd, "app_stop")){
         val["cmd"] = "stop";
-    }
-    if(!strcmp(cmd, "app_start")){
-        val["cmd"] = "start";
     }
     else if(!strcmp(cmd, "app_suspend")){
         val["cmd"] = "suspend";
@@ -170,6 +167,7 @@ void Player::timeout_cb(evutil_socket_t fd, short event, void *arg){
         if (ret < 0 ){
             std::cout << "bufferevent_write error\n";
         }
+        std::cout << "Sent \"get\" \n";
     }
 }
 

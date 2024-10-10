@@ -65,10 +65,14 @@ void Player::server_reply_slot(){
             int level = obj.value("voice").toInt();
             ui->volumeLabel->setText(QString::number(level) + "%");
         }
-        // else if(result == "prior_success"){
-        //     QString music_name = obj.value("music").toString();
-        //     ui->curLabel->setText(music_name);
-        // }
+        else if(result == "prior_success"){
+            QString music_name = obj.value("music").toString();
+            ui->curLabel->setText(music_name);
+        }
+        else if(result == "next_success"){
+            QString music_name = obj.value("music").toString();
+            ui->curLabel->setText(music_name);
+        }
         else if(result == "off_line"){
             QMessageBox::warning(this, "operation message", "music player is offline");
         }

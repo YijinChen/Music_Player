@@ -8,12 +8,12 @@
 #define SHMSIZE 4096
 void GetMusic();
 int InitShm();
-void start_play();
+void start_play(char *name);
 void stop_play();
 void suspend_play();
 void continue_play(); 
-void prior_play();
-void next_play();
+void prior_play(char *name);
+void next_play(char *name);
 void voice_up();
 void voice_down();
 void set_mode(int mode);

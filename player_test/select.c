@@ -83,7 +83,7 @@ void m_select(){
                 //socket_start_play();
                 if(g_suspend_flag == 0){
                     printf("Start play\n");
-                    socket_start_play(socket_get_status);
+                    socket_start_play();
                 }
                 else{
                     printf("Continue play\n");
@@ -130,6 +130,7 @@ void m_select(){
         else if (FD_ISSET(g_buttonfd, &tmpfd)){
             //if data is sent by button
             int id = get_key_id();
+            char name[64] = {0};
             //printf("get key id: %d\n", id);
             switch(id){
                 case 1:
@@ -139,10 +140,10 @@ void m_select(){
                     suspend_play();
                     break;
                 case 3: 
-                    prior_play();
+                    prior_play(name);
                     break;
                 case 4: 
-                    next_play();
+                    next_play(name);
                     break;
                 case 5: 
                     voice_up();
@@ -151,7 +152,7 @@ void m_select(){
                     voice_down();
                     break;
                 case 7:
-                    start_play();
+                    start_play(name);
                     break;
                 case 8: 
                     stop_play();
