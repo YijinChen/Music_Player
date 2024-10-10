@@ -177,15 +177,6 @@ void socket_prior_play(){
     struct json_object *json = json_object_new_object();
     json_object_object_add(json, "cmd", json_object_new_string("reply"));
     json_object_object_add(json, "result", json_object_new_string("prior_success"));
-    // shm s;
-    // // Ensure g_addr is not NULL
-    // if (g_addr == NULL) {
-    //     fprintf(stderr, "Error: g_addr is NULL\n");
-    //     return;
-    // }
-    // memcpy(&s, g_addr, sizeof(s));
-    // // Ensure s.cur_name is properly null-terminated
-    // s.cur_name[sizeof(s.cur_name) - 1] = '\0';
     json_object_object_add(json, "music", json_object_new_string(name));
 
     const char *buf = json_object_to_json_string(json);

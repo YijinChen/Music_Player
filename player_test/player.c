@@ -404,7 +404,7 @@ void set_volume(long volume_percent) {
 void voice_up(){
     long volume;
     volume = get_volume();
-    volume += 5;  // Increase volume by 5%
+    volume += 6;  // Increase volume by 5%
     if (volume > 100) volume = 100;  // Limit to 100%
     set_volume(volume);  // Set volume as a percentage
     printf("Volume increased to: %ld%%\n", volume);
@@ -413,7 +413,7 @@ void voice_up(){
 void voice_down(){
     long volume;
     volume = get_volume();
-    volume -= 5;  // Decrease volume by 5%
+    volume -= 4;  // Decrease volume by 5%
     if (volume < 0) volume = 0;  // Limit to 0%
     set_volume(volume);  // Set volume as a percentage
     printf("Volume decreased to: %ld%%\n", volume);
