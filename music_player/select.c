@@ -12,20 +12,7 @@
 // #include <sys/time.h>   // For struct timeval
 // #include <unistd.h>     // For close and other POSIX functions
 
-
-int g_sockfd = 3;
-//int g_mixerfd; // control the voice volumn
-fd_set readfd;
-int g_maxfd = 0;
-
-
-// void parse_message(const char *m, char *c){
-//     struct json_object *obj = json_tokener_parse(m);
-//     struct json_object *json;
-
-//     json_object_object_get_ex(obj, "cmd", &json);
-//     strcpy(c, json_object_get_string(json));
-// }
+fd_set tmpfd;
 
 void parse_message(const char *m, char *c, size_t len){
     struct json_object *obj = json_tokener_parse(m);
@@ -41,33 +28,31 @@ void parse_message(const char *m, char *c, size_t len){
 }
 
 void show(){
-    printf("1. start\n");
-    printf("2. stop\n");
-    printf("3. suspend\n");
-    printf("4. continue\n");
-    printf("5. last\n");
-    printf("6. next\n");
-    printf("7. increase volume\n");
-    printf("8. decrease volume\n");
-    printf("9. sequence mode\n");
-    printf("a. random mode\n");
-    printf("b. circle mode\n");
+    printf("start           ---- long  press [key1]\n");
+    printf("stop            ---- long  press [key2]\n");
+    printf("continue        ---- quick press [key1]\n");
+    printf("suspend         ---- quick press [key2]\n");
+    printf("last one        ---- quick press [key3]\n");
+    printf("next one        ---- quick press [key4]\n");
+    printf("increase volume ---- quick press [key5]\n");
+    printf("decrease volume ---- quick press [key6]\n");
+    printf("sequence mode   ---- long  press [key3]\n");
+    printf("random mode     ---- long  press [key4]\n");
+    printf("circle mode     ---- long  press [key5]\n");
 }
 
 
+void InitSelect()
+{
+	FD_ZERO(&readfd);
+	FD_ZERO(&tmpfd);
+	FD_SET(g_buttonfd, &readfd);
+}
+
 void m_select(){
     show();
-    fd_set tmpfd;
-    //int maxfd = (g_buttonfd > g_sockfd) ? g_buttonfd : g_sockfd;
-    //int maxfd = 3;
     int ret;
-    char message[1024] = {0};
-    
-    FD_ZERO(&readfd);
-    FD_ZERO(&tmpfd);
-
-    FD_SET(g_buttonfd, &readfd);
-    FD_SET(g_sockfd, &readfd);
+    char message[3072] = {0};
     //FD_SET(0, &readfd);    // add standard input into readfd
 
     while(1){
@@ -77,21 +62,33 @@ void m_select(){
             perror("select");
         }
 
-        if (FD_ISSET(g_sockfd, &tmpfd)){
+        if (connect_flag == 1 && FD_ISSET(g_sockfd, &tmpfd)){
             //if data is sent by tcp
             memset(message, 0, sizeof(message));
+            char cmd[128] = {0};
             ret = recv(g_sockfd, message, sizeof(message), 0);
-            if(ret == -1){
+            if(ret > 0){
+                parse_message(message, cmd, sizeof(cmd));
+                printf("get message from socket: %s\n", cmd);
+            }
+            else if(ret == -1){
                 perror("recv");
             }
-
-            char cmd[128] = {0};
-            //printf("In select.c: ready to parse_message\n");
-            parse_message(message, cmd, sizeof(cmd));
-            //printf("In select.c: finish parse_message\n");
+            else{   //ret == 0
+                printf("connection stoped by server\n");
+                connect_flag = 0;
+            };
 
             if(!strcmp(cmd, "start")){
-                socket_start_play();
+                //socket_start_play();
+                if(g_suspend_flag == 0){
+                    printf("Start play\n");
+                    socket_start_play();
+                }
+                else{
+                    printf("Continue play\n");
+                    socket_continue_play();
+                }
             }
             else if(!strcmp(cmd, "stop")){
                 socket_stop_play();
@@ -99,9 +96,9 @@ void m_select(){
             else if(!strcmp(cmd, "suspend")){
                 socket_suspend_play();
             }
-            else if(!strcmp(cmd, "continue")){
-                socket_continue_play();
-            }
+            // else if(!strcmp(cmd, "continue")){
+            //     socket_continue_play();
+            // }
             else if(!strcmp(cmd, "prior")){
                 socket_prior_play();
             }
@@ -124,7 +121,6 @@ void m_select(){
                 socket_mode_play(CIRCLEMODE);
             }
             else if(!strcmp(cmd, "get")){
-                printf("received get\n");
                 socket_get_status();
             }
             else if(!strcmp(cmd, "music")){
@@ -134,25 +130,43 @@ void m_select(){
         else if (FD_ISSET(g_buttonfd, &tmpfd)){
             //if data is sent by button
             int id = get_key_id();
-            printf("get key id: %d\n", id);
+            char name[64] = {0};
+            //printf("get key id: %d\n", id);
             switch(id){
-                case '1':  //start play
-                    start_play();
+                case 1:
+                    continue_play();
                     break;
-                case '2': //stop play
-                    stop_play();
+                case 2: 
+                    suspend_play();
                     break;
-                case '3': //suspend
-                    prior_play();
+                case 3: 
+                    prior_play(name);
                     break;
-                case '4': //continue
-                    next_play();
+                case 4: 
+                    next_play(name);
                     break;
-                case '5': //play last music
+                case 5: 
                     voice_up();
                     break;
-                case '6':
+                case 6:
                     voice_down();
+                    break;
+                case 7:
+                    start_play(name);
+                    break;
+                case 8: 
+                    stop_play();
+                    break;
+                case 9: 
+                    set_mode(SEQUENCEMODE);
+                    break;
+                case 10: 
+                    set_mode(RANDOMMODE);
+                    break;
+                case 11:
+                    set_mode(CIRCLEMODE);
+                    break;
+                case 12:
                     break;
             }
         }
@@ -197,6 +211,5 @@ void m_select(){
         //             break;  
         //     }
         // }
-
     }
 }

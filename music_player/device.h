@@ -2,8 +2,8 @@
 #define DEVICE_H
 
 int InitDriver();
-void led_on(int which);
-void led_off(int which);
+void led_on();
+void led_off();
 int get_key_id();
 
 extern int g_buttonfd;

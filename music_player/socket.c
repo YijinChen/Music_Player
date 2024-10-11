@@ -9,13 +9,19 @@
 #include <string.h>
 #include <unistd.h> // For sleep()
 #include "device.h"
-#include "select.h"
+//#include "select.h"
 #include <signal.h> //for signal()s
 #include <json-c/json.h>
 #include "player.h"
 #include <sys/select.h>
 #include <errno.h>
 #include "link.h"
+#include <fcntl.h>
+
+int g_sockfd = 0;
+fd_set readfd;
+int g_maxfd = 0;
+int connect_flag = 0;
 
 //every 5 seconds, send "alive" to server
 void send_server(int sig){
@@ -48,7 +54,7 @@ void *connect_cb(void *arg){
     struct sockaddr_in server_addr;
     memset(&server_addr, 0, sizeof(server_addr));
     server_addr.sin_family = PF_INET;
-    server_addr.sin_port = SERVER_PORT;
+    server_addr.sin_port = htons(SERVER_PORT);
     server_addr.sin_addr.s_addr = inet_addr(SERVER_IP);
 
     while(count--){
@@ -63,18 +69,19 @@ void *connect_cb(void *arg){
             printf("finish sleep\n");
             continue;
         }
-        //when connection is successful, let all 4 leds shine
-        led_on(0);
-        led_on(1);
-        led_on(2);
-        led_on(3);
+        FD_SET(g_sockfd, &readfd);
+
+        //when connection is successful, let the led shine
+        led_on();
+        // led_on(1);
+        // led_on(2);
+        // led_on(3);
 
         //after 5 seconds, send SIGALRM to process
         alarm(TIMEOUT);
         signal(SIGALRM, send_server);
 
-        //sucessfully connect to server, add fd to set
-        FD_SET(g_sockfd, &readfd);
+        connect_flag = 1;
         break;
     }
     return NULL;
@@ -82,10 +89,10 @@ void *connect_cb(void *arg){
 
 int InitSocket(){
     g_sockfd = socket(PF_INET, SOCK_STREAM, 0);
-    //printf("g_sockfd: %d\n", g_sockfd);
     if (g_sockfd == -1){
         return FAILURE;
     }
+    fcntl(g_sockfd, F_SETFL, O_NONBLOCK);
 
     //creat a thread and request the connection to server
     pthread_t tid;
@@ -104,11 +111,15 @@ int InitSocket(){
 }
 
 void socket_start_play(){
-    start_play();
-
+    char name[64] = {0};
+    start_play(name);
     struct json_object *json = json_object_new_object();
     json_object_object_add(json, "cmd", json_object_new_string("reply"));
     json_object_object_add(json, "result", json_object_new_string("start_success"));
+    long volume;
+    volume = get_volume();
+    json_object_object_add(json, "voice", json_object_new_int64(volume));
+    json_object_object_add(json, "music", json_object_new_string(name));
 
     const char *buf = json_object_to_json_string(json);
     int ret = send(g_sockfd, buf, strlen(buf), 0);
@@ -159,13 +170,14 @@ void socket_continue_play(){
     }
 }
 
-
 void socket_prior_play(){
-    prior_play();
+    char name[64] = {0};
+    prior_play(name);
 
     struct json_object *json = json_object_new_object();
     json_object_object_add(json, "cmd", json_object_new_string("reply"));
-    json_object_object_add(json, "result", json_object_new_string("success"));
+    json_object_object_add(json, "result", json_object_new_string("prior_success"));
+    json_object_object_add(json, "music", json_object_new_string(name));
 
     const char *buf = json_object_to_json_string(json);
     int ret = send(g_sockfd, buf, strlen(buf), 0);
@@ -175,11 +187,13 @@ void socket_prior_play(){
 }
 
 void socket_next_play(){
-    next_play();
+    char name[64] = {0};
+    next_play(name);
 
     struct json_object *json = json_object_new_object();
     json_object_object_add(json, "cmd", json_object_new_string("reply"));
-    json_object_object_add(json, "result", json_object_new_string("success"));
+    json_object_object_add(json, "result", json_object_new_string("next_success"));
+    json_object_object_add(json, "music", json_object_new_string(name));
 
     const char *buf = json_object_to_json_string(json);
     int ret = send(g_sockfd, buf, strlen(buf), 0);
@@ -193,7 +207,10 @@ void socket_volume_up_play(){
 
     struct json_object *json = json_object_new_object();
     json_object_object_add(json, "cmd", json_object_new_string("reply"));
-    json_object_object_add(json, "result", json_object_new_string("success"));
+    json_object_object_add(json, "result", json_object_new_string("volume_success"));
+    long volume;
+    volume = get_volume();
+    json_object_object_add(json, "voice", json_object_new_int64(volume));
 
     const char *buf = json_object_to_json_string(json);
     int ret = send(g_sockfd, buf, strlen(buf), 0);
@@ -204,10 +221,12 @@ void socket_volume_up_play(){
 
 void socket_volume_down_play(){
     voice_down();
-
     struct json_object *json = json_object_new_object();
     json_object_object_add(json, "cmd", json_object_new_string("reply"));
-    json_object_object_add(json, "result", json_object_new_string("success"));
+    json_object_object_add(json, "result", json_object_new_string("volume_success"));
+    long volume;
+    volume = get_volume();
+    json_object_object_add(json, "voice", json_object_new_int64(volume));
 
     const char *buf = json_object_to_json_string(json);
     int ret = send(g_sockfd, buf, strlen(buf), 0);
@@ -230,21 +249,8 @@ void socket_mode_play(int mode){
     }
 }
 
-// void socket_start_play(){
-//     start_play();
-
-//     struct json_object *json = json_object_new_object();
-//     json_object_object_add(json, "cmd", json_object_new_string("reply"));
-//     json_object_object_add(json, "result", json_object_new_string("success"));
-
-//     const char *buf = json_object_to_json_string(json);
-//     int ret = send(g_sockfd, buf, strlen(buf), 0);
-//     if(ret == -1){
-//         perror("send");
-//     }
-// }
-
 void socket_get_status(){
+    printf("Entered socket_get_status...\n");
     //play status, current music, volume
     struct json_object *json = json_object_new_object();
     json_object_object_add(json, "cmd", json_object_new_string("reply_status"));
@@ -257,7 +263,9 @@ void socket_get_status(){
     else if(g_start_flag == 0){
         json_object_object_add(json, "status", json_object_new_string("stop"));
     }
-    json_object_object_add(json, "voice", json_object_new_int(iLeft));
+    long volume;
+    volume = get_volume();
+    json_object_object_add(json, "voice", json_object_new_int64(volume));
     
     shm s;
     // Ensure g_addr is not NULL
@@ -275,6 +283,7 @@ void socket_get_status(){
     if(ret == -1){
         perror("send");
     }
+    printf("send status to server\n");
 }
 
 void socket_get_music(){

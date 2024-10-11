@@ -93,7 +93,9 @@ void Player::server_reply_slot(){
             }
         }
         QString music_name = obj.value("music").toString();
-        ui->curLabel->setText(music_name);
+        if(music_name != "|"){
+            ui->curLabel->setText(music_name);
+        }
 
         int level = obj.value("voice").toInt();
         ui->volumeLabel->setText(QString::number(level) + "%");
@@ -108,6 +110,9 @@ void Player::server_reply_slot(){
             result.append('\n');
         }
         ui->musicEdit->setText(result);
+        ui->curLabel->setText("No music playing ...");
+        ui->volumeLabel->setText("0%");
+        ui->seqButton->setChecked(true);
     }
 }
 

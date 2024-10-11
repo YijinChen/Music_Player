@@ -10,12 +10,13 @@ struct Node *head; //head for music list
 
 //initialize music list as bidirectional recycle link
 void ShowLink(){
-    printf("\nMusic Link:\n");
+    printf("\n[Music List:]\n");
     Node *p = head->next;
     while(p != head ){
         printf("%s\n", p->music_name);
         p = p->next;
     }
+    printf("---------------------------\n");
 }
 
 int InitLink(){
