@@ -9,6 +9,7 @@
 #define TIMEOUT 1
 
 void send_server(int sig);
+void *shine_led_thread(void *arg);
 void *connect_cb(void *arg);
 int InitSocket();
 void socket_start_play();

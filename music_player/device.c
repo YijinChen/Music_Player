@@ -17,6 +17,7 @@
 
 int g_buttonfd = 3;
 int g_ledfd;
+int shine_flag = 0;
 
 void led_on(){
     int status = 1;
@@ -28,6 +29,36 @@ void led_off(){
     int status = 0;
     write(g_ledfd, &status, 1);
     //ioctl(g_ledfd, 0, which);
+}
+
+// Signal handler for shine_led_on to stop shining when interrupted
+// void stop_shining(int signum) {
+//     shine_flag = 0;  // Stop shining
+//     led_off();  // Ensure the LED is turned off
+//     printf("Shining interrupted and stopped.\n");
+// }
+
+void shine_led_on() {
+    shine_flag = 1;  // Set the shining flag to true
+    int interval = 500; // 500 milliseconds on and off
+
+    // Set up a signal handler to stop shining when needed
+    // signal(SIGINT, stop_shining);
+
+    //printf("LED shining started. Press Ctrl+C to stop.\n");
+
+    while (shine_flag) {
+        led_on();
+        usleep(interval * 1000);  // Wait for 'interval' milliseconds
+        led_off();
+        usleep(interval * 1000);  // Wait for 'interval' milliseconds
+    }
+}
+
+void shine_led_off() {
+    shine_flag = 0;  // Stop shining
+    led_off();  // Ensure the LED is turned off
+    //printf("LED shining stopped.\n");
 }
 
 int InitDriver(){
@@ -51,13 +82,6 @@ int InitDriver(){
     int status = 0;
     led_off();
 
-    
-    //Open the mixer device file
-    // g_mixerfd = open("/dev/mixer", O_WRONLY);
-    // if (g_mixerfd == -1){
-    //     return FAILURE;
-    // }
-
     if(g_ledfd > g_maxfd){
         g_maxfd = g_ledfd;
     }
@@ -80,7 +104,7 @@ int get_key_id(){
 		//printf("GPIO %d, State %d\n", gpio_num, gpio_state);
 		int key = 0;
 
-		if (gpio_key == 1)
+		if (gpio_key == 1) //quick press
 		{
 			switch (gpio_num)
 			{
@@ -106,7 +130,7 @@ int get_key_id(){
 				break;
 			}
 		}
-        if (gpio_key == 2)
+        if (gpio_key == 2) //long press
 		{
 			switch (gpio_num)
 			{

@@ -48,8 +48,14 @@ void my_sleep(int seconds) {
     }
 }
 
+void *shine_led_thread(void *arg) {
+    shine_led_on();  // This will run in a separate thread
+    return NULL;
+}
+
 void *connect_cb(void *arg){
     int count = 10;
+    pthread_t led_thread;  // Declare a thread for LED shining
 
     struct sockaddr_in server_addr;
     memset(&server_addr, 0, sizeof(server_addr));
@@ -57,33 +63,45 @@ void *connect_cb(void *arg){
     server_addr.sin_port = htons(SERVER_PORT);
     server_addr.sin_addr.s_addr = inet_addr(SERVER_IP);
 
-    while(count--){
-        //when sending connection request to server, let the first led shine
-        //led_on(0);
-        printf("try to connect, count = %d\n", count);
+    // Start LED shining in a separate thread
+    if (pthread_create(&led_thread, NULL, shine_led_thread, NULL) != 0) {
+        perror("Failed to create LED thread");
+        return NULL;
+    }
+
+    while (count--) {
+        // The LED is already shining in the background
+        printf("Connecting to server ...\n");
         int ret = connect(g_sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr));
-        if (ret == -1){
-            printf("fail to connect\n");
-            printf("Retrying connection in 5 seconds...\n");
-            my_sleep(3); // If fail to connect, sleep 5 seconds
-            printf("finish sleep\n");
+        if (ret == -1) {
+            my_sleep(3);  // If connection fails, sleep for 3 seconds
             continue;
         }
+
         FD_SET(g_sockfd, &readfd);
 
-        //when connection is successful, let the led shine
-        led_on();
-        // led_on(1);
-        // led_on(2);
-        // led_on(3);
+        // When connection is successful, stop the LED from shining
+        shine_led_off();  // Turn off LED shining
 
-        //after 5 seconds, send SIGALRM to process
+        // Optionally wait for the thread to finish (ensure the LED stops shining)
+        pthread_join(led_thread, NULL);
+
+        led_on();  // Turn the LED on to indicate a successful connection
+
+        // After 5 seconds, send SIGALRM to process
         alarm(TIMEOUT);
         signal(SIGALRM, send_server);
 
         connect_flag = 1;
         break;
     }
+
+    if (connect_flag == 0) {
+        printf("Failed to connect to server, please try again\n");
+        shine_led_off();  // Make sure to stop shining even if connection fails
+        pthread_join(led_thread, NULL);  // Ensure the LED thread has stopped
+    }
+
     return NULL;
 }
 
