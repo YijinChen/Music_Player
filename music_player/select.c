@@ -9,6 +9,7 @@
 #include "socket.h"
 #include <errno.h>
 #include <unistd.h> // for sleep()
+#include <pthread.h>
 // #include <sys/time.h>   // For struct timeval
 // #include <unistd.h>     // For close and other POSIX functions
 
@@ -28,17 +29,18 @@ void parse_message(const char *m, char *c, size_t len){
 }
 
 void show(){
-    printf("start           ---- long  press [key1]\n");
-    printf("stop            ---- long  press [key2]\n");
-    printf("continue        ---- quick press [key1]\n");
-    printf("suspend         ---- quick press [key2]\n");
-    printf("last one        ---- quick press [key3]\n");
-    printf("next one        ---- quick press [key4]\n");
-    printf("increase volume ---- quick press [key5]\n");
-    printf("decrease volume ---- quick press [key6]\n");
-    printf("sequence mode   ---- long  press [key3]\n");
-    printf("random mode     ---- long  press [key4]\n");
-    printf("circle mode     ---- long  press [key5]\n");
+    printf("start              ---- long  press [key1]\n");
+    printf("stop               ---- long  press [key2]\n");
+    printf("continue           ---- quick press [key1]\n");
+    printf("suspend            ---- quick press [key2]\n");
+    printf("last one           ---- quick press [key3]\n");
+    printf("next one           ---- quick press [key4]\n");
+    printf("increase volume    ---- quick press [key5]\n");
+    printf("decrease volume    ---- quick press [key6]\n");
+    printf("sequence mode      ---- long  press [key3]\n");
+    printf("random mode        ---- long  press [key4]\n");
+    printf("circle mode        ---- long  press [key5]\n");
+    printf("connect to server  ---- long  press [key6]\n");
 }
 
 
@@ -131,6 +133,8 @@ void m_select(){
             //if data is sent by button
             int id = get_key_id();
             char name[64] = {0};
+            pthread_t tid;
+            int ret;
             //printf("get key id: %d\n", id);
             switch(id){
                 case 1:
@@ -167,6 +171,12 @@ void m_select(){
                     set_mode(CIRCLEMODE);
                     break;
                 case 12:
+                    //creat a thread and request the connection to server
+                    ret = pthread_create(&tid, NULL, connect_cb, NULL);
+                    //printf("ret: %d\n", ret);
+                    if (ret != 0){
+                        printf("Failed to create connect_cb pthread\n");
+                    }
                     break;
             }
         }

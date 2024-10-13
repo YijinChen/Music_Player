@@ -78,15 +78,13 @@ void *connect_cb(void *arg){
             continue;
         }
 
+        printf("Sucessfully connect to server\n");
         FD_SET(g_sockfd, &readfd);
-
-        // When connection is successful, stop the LED from shining
+        // When connection is successful, shop led shining, keep led on
         shine_led_off();  // Turn off LED shining
-
         // Optionally wait for the thread to finish (ensure the LED stops shining)
         pthread_join(led_thread, NULL);
-
-        led_on();  // Turn the LED on to indicate a successful connection
+        led_on();
 
         // After 5 seconds, send SIGALRM to process
         alarm(TIMEOUT);
@@ -97,7 +95,7 @@ void *connect_cb(void *arg){
     }
 
     if (connect_flag == 0) {
-        printf("Failed to connect to server, please try again\n");
+        printf("Failed to connect to server, please try again (long press key 6)\n");
         shine_led_off();  // Make sure to stop shining even if connection fails
         pthread_join(led_thread, NULL);  // Ensure the LED thread has stopped
     }
@@ -117,7 +115,7 @@ int InitSocket(){
     int ret = pthread_create(&tid, NULL, connect_cb, NULL);
     //printf("ret: %d\n", ret);
     if (ret != 0){
-        printf("In InitSocket: fail to creat pthread\n");
+        printf("In InitSocket: fail to create pthread\n");
         return FAILURE;
     }
 
