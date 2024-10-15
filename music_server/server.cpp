@@ -45,9 +45,7 @@ void PlayerServer::listener_cb(struct evconnlistener *listener, evutil_socket_t 
     }
     //here send base to read_cb, so that read_cb (static function) can use base (unstatic member variable)
     bufferevent_setcb(bev, read_cb, NULL, event_cb, base);
-    //bufferevent_setcb(bev, read_cb, NULL, event_cb, NULL);
     bufferevent_enable(bev, EV_READ);
-    //bufferevent_enable(bev, EV_WRITE); ///added code in debug
 }
 
 void PlayerServer::read_cb(struct bufferevent *bev, void *ctx){
@@ -125,7 +123,7 @@ void PlayerServer::read_cb(struct bufferevent *bev, void *ctx){
     else if(!strcmp(cmd, "app_continue")){
         p->player_operation(l, bev, cmd);
     }
-    else if(!strcmp(cmd, "app_prior")){
+    else if(!strcmp(cmd, "app_previous")){
         p->player_operation(l, bev, cmd);
     }
     else if(!strcmp(cmd, "app_next")){
@@ -169,11 +167,11 @@ void PlayerServer::read_cb(struct bufferevent *bev, void *ctx){
         p->player_alive_info(l, bev, val, base);
     }
     else if(!strcmp(cmd, "reply_status")){
-        std::cout << "received status\n";
+        //std::cout << "received status\n";
         p->player_reply_result(l, bev, val);
     }
     else if(!strcmp(cmd, "reply_music")){
-        std::cout <<"Received reply_music from player\n";
+        //std::cout <<"Received reply_music from player\n";
         p->player_reply_result(l, bev, val);
     }
 }
@@ -182,13 +180,13 @@ void PlayerServer::event_cb(struct bufferevent *bev, short wait, void *ctx){
     if(wait & BEV_EVENT_EOF){
         for(std::list<Node>::iterator it = l->begin(); it != l->end(); it++){
             if (it->device_bev == bev){
-                std::cout << "music player is offline\n";
+                std::cout << "Music player is offline\n";
                 it -> online_flag = 0;
                 event_del(it->timeout); //delete timer
                 return;
             }
             if(it->app_bev == bev){
-                std::cout << "App is offline" << std::endl;
+                std::cout << "QT app is offline" << std::endl;
                 it->app_online_flag = 0;
             }
         }

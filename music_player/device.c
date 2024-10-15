@@ -17,7 +17,7 @@
 
 int g_buttonfd = 3;
 int g_ledfd;
-int shine_flag = 0;
+int flash_flag = 0;
 
 void led_on(){
     int status = 1;
@@ -31,23 +31,11 @@ void led_off(){
     //ioctl(g_ledfd, 0, which);
 }
 
-// Signal handler for shine_led_on to stop shining when interrupted
-// void stop_shining(int signum) {
-//     shine_flag = 0;  // Stop shining
-//     led_off();  // Ensure the LED is turned off
-//     printf("Shining interrupted and stopped.\n");
-// }
-
-void shine_led_on() {
-    shine_flag = 1;  // Set the shining flag to true
+void flash_led_on() {
+    flash_flag = 1;  // Set the flash flag to true
     int interval = 500; // 500 milliseconds on and off
 
-    // Set up a signal handler to stop shining when needed
-    // signal(SIGINT, stop_shining);
-
-    //printf("LED shining started. Press Ctrl+C to stop.\n");
-
-    while (shine_flag) {
+    while (flash_flag) {
         led_on();
         usleep(interval * 1000);  // Wait for 'interval' milliseconds
         led_off();
@@ -55,10 +43,10 @@ void shine_led_on() {
     }
 }
 
-void shine_led_off() {
-    shine_flag = 0;  // Stop shining
+void flash_led_off() {
+    flash_flag = 0;  // Stop flashing
     led_off();  // Ensure the LED is turned off
-    //printf("LED shining stopped.\n");
+    //printf("LED flashing stopped.\n");
 }
 
 int InitDriver(){

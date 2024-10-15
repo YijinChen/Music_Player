@@ -48,13 +48,13 @@ void my_sleep(int seconds) {
     }
 }
 
-void *shine_led_thread(void *arg) {
-    shine_led_on();  // This will run in a separate thread
+void *flash_led_thread(void *arg) {
+    flash_led_on();  // This will run in a separate thread
     return NULL;
 }
 
 void *connect_cb(void *arg){
-    int count = 10;
+    int count = 5;
     pthread_t led_thread;  // Declare a thread for LED shining
 
     struct sockaddr_in server_addr;
@@ -63,8 +63,8 @@ void *connect_cb(void *arg){
     server_addr.sin_port = htons(SERVER_PORT);
     server_addr.sin_addr.s_addr = inet_addr(SERVER_IP);
 
-    // Start LED shining in a separate thread
-    if (pthread_create(&led_thread, NULL, shine_led_thread, NULL) != 0) {
+    // Start LED flash in a separate thread
+    if (pthread_create(&led_thread, NULL, flash_led_thread, NULL) != 0) {
         perror("Failed to create LED thread");
         return NULL;
     }
@@ -79,10 +79,10 @@ void *connect_cb(void *arg){
         }
 
         printf("Sucessfully connect to server\n");
-        FD_SET(g_sockfd, &readfd);
-        // When connection is successful, shop led shining, keep led on
-        shine_led_off();  // Turn off LED shining
-        // Optionally wait for the thread to finish (ensure the LED stops shining)
+        FD_SET(g_sockfd, &readfd); // add g_sockfd into readfd
+        // When connection is successful, shop led flashing, keep led on
+        flash_led_off();  // Turn off LED falshing
+        // Optionally wait for the thread to finish (ensure the LED stops flashing)
         pthread_join(led_thread, NULL);
         led_on();
 
@@ -96,7 +96,7 @@ void *connect_cb(void *arg){
 
     if (connect_flag == 0) {
         printf("Failed to connect to server, please try again (long press key 6)\n");
-        shine_led_off();  // Make sure to stop shining even if connection fails
+        flash_led_off();  // Make sure to stop shining even if connection fails
         pthread_join(led_thread, NULL);  // Ensure the LED thread has stopped
     }
 
@@ -134,7 +134,7 @@ void socket_start_play(){
     json_object_object_add(json, "result", json_object_new_string("start_success"));
     long volume;
     volume = get_volume();
-    json_object_object_add(json, "voice", json_object_new_int64(volume));
+    json_object_object_add(json, "volume", json_object_new_int64(volume));
     json_object_object_add(json, "music", json_object_new_string(name));
 
     const char *buf = json_object_to_json_string(json);
@@ -172,12 +172,12 @@ void socket_suspend_play(){
     }
 }
 
-void socket_continue_play(){
-    continue_play();
+void socket_resume_play(){
+    resume_play();
 
     struct json_object *json = json_object_new_object();
     json_object_object_add(json, "cmd", json_object_new_string("reply"));
-    json_object_object_add(json, "result", json_object_new_string("continue_success"));
+    json_object_object_add(json, "result", json_object_new_string("resume_success"));
 
     const char *buf = json_object_to_json_string(json);
     int ret = send(g_sockfd, buf, strlen(buf), 0);
@@ -186,13 +186,13 @@ void socket_continue_play(){
     }
 }
 
-void socket_prior_play(){
+void socket_previous_play(){
     char name[64] = {0};
-    prior_play(name);
+    previous_play(name);
 
     struct json_object *json = json_object_new_object();
     json_object_object_add(json, "cmd", json_object_new_string("reply"));
-    json_object_object_add(json, "result", json_object_new_string("prior_success"));
+    json_object_object_add(json, "result", json_object_new_string("previous_success"));
     json_object_object_add(json, "music", json_object_new_string(name));
 
     const char *buf = json_object_to_json_string(json);
@@ -219,14 +219,14 @@ void socket_next_play(){
 }
 
 void socket_volume_up_play(){
-    voice_up();
+    volume_up();
 
     struct json_object *json = json_object_new_object();
     json_object_object_add(json, "cmd", json_object_new_string("reply"));
     json_object_object_add(json, "result", json_object_new_string("volume_success"));
     long volume;
     volume = get_volume();
-    json_object_object_add(json, "voice", json_object_new_int64(volume));
+    json_object_object_add(json, "volume", json_object_new_int64(volume));
 
     const char *buf = json_object_to_json_string(json);
     int ret = send(g_sockfd, buf, strlen(buf), 0);
@@ -236,13 +236,13 @@ void socket_volume_up_play(){
 }
 
 void socket_volume_down_play(){
-    voice_down();
+    volume_down();
     struct json_object *json = json_object_new_object();
     json_object_object_add(json, "cmd", json_object_new_string("reply"));
     json_object_object_add(json, "result", json_object_new_string("volume_success"));
     long volume;
     volume = get_volume();
-    json_object_object_add(json, "voice", json_object_new_int64(volume));
+    json_object_object_add(json, "volume", json_object_new_int64(volume));
 
     const char *buf = json_object_to_json_string(json);
     int ret = send(g_sockfd, buf, strlen(buf), 0);
@@ -281,7 +281,7 @@ void socket_get_status(){
     }
     long volume;
     volume = get_volume();
-    json_object_object_add(json, "voice", json_object_new_int64(volume));
+    json_object_object_add(json, "volume", json_object_new_int64(volume));
     
     shm s;
     // Ensure g_addr is not NULL

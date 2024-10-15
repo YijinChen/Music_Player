@@ -50,22 +50,22 @@ void Player::server_reply_slot(){
             play_flag = START_PLAY;
             QString music_name = obj.value("music").toString();
             ui->curLabel->setText(music_name);
-            int level = obj.value("voice").toInt();
+            int level = obj.value("volume").toInt();
             ui->volumeLabel->setText(QString::number(level) + "%");
         }
         else if(result == "suspend_success"){
             ui->startButton->setText("| >");
             play_flag = SUSPEND_PLAY;
         }
-        else if(result == "continue_success"){
+        else if(result == "resume_success"){
             ui->startButton->setText("| |");
             play_flag = START_PLAY;
         }
         else if(result == "volume_success"){
-            int level = obj.value("voice").toInt();
+            int level = obj.value("volume").toInt();
             ui->volumeLabel->setText(QString::number(level) + "%");
         }
-        else if(result == "prior_success"){
+        else if(result == "previous_success"){
             QString music_name = obj.value("music").toString();
             ui->curLabel->setText(music_name);
         }
@@ -97,7 +97,7 @@ void Player::server_reply_slot(){
             ui->curLabel->setText(music_name);
         }
 
-        int level = obj.value("voice").toInt();
+        int level = obj.value("volume").toInt();
         ui->volumeLabel->setText(QString::number(level) + "%");
 
     }
@@ -138,7 +138,7 @@ void Player::on_startButton_clicked()
 void Player::on_priorButton_clicked()
 {
     QJsonObject obj;
-    obj.insert("cmd", "app_prior");
+    obj.insert("cmd", "app_previous");
     QByteArray ba = QJsonDocument(obj).toJson();
     socket->write(ba);
 

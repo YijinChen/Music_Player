@@ -31,12 +31,12 @@ void parse_message(const char *m, char *c, size_t len){
 void show(){
     printf("start              ---- long  press [key1]\n");
     printf("stop               ---- long  press [key2]\n");
-    printf("continue           ---- quick press [key1]\n");
     printf("suspend            ---- quick press [key2]\n");
-    printf("last one           ---- quick press [key3]\n");
+    printf("resume             ---- quick press [key1]\n");
+    printf("previous one       ---- quick press [key3]\n");
     printf("next one           ---- quick press [key4]\n");
-    printf("increase volume    ---- quick press [key5]\n");
-    printf("decrease volume    ---- quick press [key6]\n");
+    printf("volume up          ---- quick press [key5]\n");
+    printf("volume down        ---- quick press [key6]\n");
     printf("sequence mode      ---- long  press [key3]\n");
     printf("random mode        ---- long  press [key4]\n");
     printf("circle mode        ---- long  press [key5]\n");
@@ -82,14 +82,13 @@ void m_select(){
             };
 
             if(!strcmp(cmd, "start")){
-                //socket_start_play();
                 if(g_suspend_flag == 0){
                     printf("Start play\n");
                     socket_start_play();
                 }
                 else{
                     printf("Continue play\n");
-                    socket_continue_play();
+                    socket_resume_play();
                 }
             }
             else if(!strcmp(cmd, "stop")){
@@ -98,11 +97,8 @@ void m_select(){
             else if(!strcmp(cmd, "suspend")){
                 socket_suspend_play();
             }
-            // else if(!strcmp(cmd, "continue")){
-            //     socket_continue_play();
-            // }
-            else if(!strcmp(cmd, "prior")){
-                socket_prior_play();
+            else if(!strcmp(cmd, "previous")){
+                socket_previous_play();
             }
             else if(!strcmp(cmd, "next")){
                 socket_next_play();
@@ -138,22 +134,22 @@ void m_select(){
             //printf("get key id: %d\n", id);
             switch(id){
                 case 1:
-                    continue_play();
+                    resume_play();
                     break;
                 case 2: 
                     suspend_play();
                     break;
                 case 3: 
-                    prior_play(name);
+                    previous_play(name);
                     break;
                 case 4: 
                     next_play(name);
                     break;
                 case 5: 
-                    voice_up();
+                    volume_up();
                     break;
                 case 6:
-                    voice_down();
+                    volume_down();
                     break;
                 case 7:
                     start_play(name);

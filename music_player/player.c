@@ -48,7 +48,7 @@ int InitShm(){
     if (shmid == -1) {
         if (errno == EEXIST) {
             // If the segment already exists, try to access the existing segment
-            fprintf(stderr, "shmget failed: Segment already exists. Trying to access existing segment.\n");
+            //fprintf(stderr, "shmget failed: Segment already exists. Trying to access existing segment.\n");
             shmid = shmget(SHMKEY, SHMSIZE, 0666);
             if (shmid == -1) {
                 fprintf(stderr, "shmget failed to access existing segment: %s\n", strerror(errno));
@@ -59,7 +59,7 @@ int InitShm(){
             exit(EXIT_FAILURE);
         }
     }
-    printf("Shared memory segment created or accessed with ID: %d\n", shmid);
+    //printf("Shared memory segment created or accessed with ID: %d\n", shmid);
 
     //map
     g_addr = (char *)shmat(shmid, NULL, 0);
@@ -72,7 +72,7 @@ int InitShm(){
         exit(EXIT_FAILURE);
         return FAILURE;
     }
-    printf("Attached to shared memory segment at address: %p\n", g_addr);
+    //printf("Attached to shared memory segment at address: %p\n", g_addr);
 
     //initialize shared memory information
     shm s;
@@ -215,8 +215,6 @@ void start_play(char *name){
 
     //set default mode to sequence
     set_mode(SEQUENCEMODE);
-
-    //char name[128] = {0};
     strcpy(name, head->next->music_name);
     start_time = time(NULL);  // Record start time when music starts
 
@@ -271,7 +269,7 @@ void suspend_play(){
     g_suspend_flag = 1;
 }
 
-void continue_play(){
+void resume_play(){
     if(g_start_flag == 0 || g_suspend_flag == 0){
         return;
     }
@@ -298,7 +296,7 @@ void continue_play(){
     g_suspend_flag = 0;
 }
 
-void prior_play(char *name){
+void previous_play(char *name){
     if(g_start_flag == 0){
         return;
     }
@@ -313,9 +311,9 @@ void prior_play(char *name){
 
     g_start_flag = 0;
     //char name[64] = {0};
-    FindPriorMusic(s.cur_name, s.play_mode, name);
-    play_music(name, 0);
+    FindPreviousMusic(s.cur_name, s.play_mode, name);
 
+    play_music(name, 0);
     g_start_flag = 1;
 }
 
@@ -404,7 +402,7 @@ void set_volume(long volume_percent) {
     current_volume = volume;
 }
 
-void voice_up(){
+void volume_up(){
     long volume;
     volume = get_volume();
     volume += 6;  // Increase volume by 5%
@@ -413,7 +411,7 @@ void voice_up(){
     printf("Volume increased to: %ld%%\n", volume);
 }
 
-void voice_down(){
+void volume_down(){
     long volume;
     volume = get_volume();
     volume -= 4;  // Decrease volume by 5%
@@ -431,7 +429,7 @@ void set_mode(int mode){
     memcpy(g_addr, &s, sizeof(s));
     char mode_name[64];
     mode_to_string(mode, mode_name);
-    printf("successfully change mode to %s!\n", mode_name);
+    printf("Set playback mode to %s\n", mode_name);
 }
 
 void restore_terminal_settings() {

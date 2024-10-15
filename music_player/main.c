@@ -26,9 +26,6 @@ int main(){
     ret = InitSocket(); //initialize the network connection
     if(ret == FAILURE){
         printf("fail to initialize network connection");
-        // if fail to connect, turn on 2 leds 
-        // led_on(0);
-        // led_on(1);
     }
     // else{
     //     printf("Succeed to initialize network connection\n");

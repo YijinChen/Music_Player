@@ -54,8 +54,8 @@ void Player::player_operation(std::list<Node> *l, struct bufferevent *app_bev, c
     if(!strcmp(cmd, "app_continue")){
         val["cmd"] = "continue";
     }
-    else if(!strcmp(cmd, "app_prior")){
-        val["cmd"] = "prior";
+    else if(!strcmp(cmd, "app_previous")){
+        val["cmd"] = "previous";
     }
     if(!strcmp(cmd, "app_next")){
         val["cmd"] = "next";
@@ -139,7 +139,6 @@ void Player::player_reply_result(std::list<Node> *l, struct bufferevent *bev, Js
 
 
 void Player::timeout_cb(evutil_socket_t fd, short event, void *arg){
-    //struct bufferevent *bev = (struct bufferevent *)arg;
     tNode t;
     memcpy(&t, arg, sizeof(tNode));
 
@@ -167,7 +166,7 @@ void Player::timeout_cb(evutil_socket_t fd, short event, void *arg){
         if (ret < 0 ){
             std::cout << "bufferevent_write error\n";
         }
-        std::cout << "Sent \"get\" \n";
+        //std::cout << "Sent \"get\" \n";
     }
 }
 

@@ -13,7 +13,7 @@ typedef struct Node Node;
 int InitLink();
 int InsertLink(Node *h, const char *name);
 void FindNextMusic(const char *cur, int mode, char *next);
-void FindPriorMusic(const char *cur, int mode, char *prior);
+void FindPreviousMusic(const char *cur, int mode, char *prior);
 void ShowLink();
 
 #endif

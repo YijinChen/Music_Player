@@ -9,14 +9,14 @@
 #define TIMEOUT 1
 
 void send_server(int sig);
-void *shine_led_thread(void *arg);
+void *flash_led_thread(void *arg);
 void *connect_cb(void *arg);
 int InitSocket();
 void socket_start_play();
 void socket_stop_play();
 void socket_suspend_play();
-void socket_continue_play();
-void socket_prior_play();
+void socket_resume_play();
+void socket_previous_play();
 void socket_next_play();
 void socket_volume_up_play();
 void socket_volume_down_play();

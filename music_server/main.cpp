@@ -7,6 +7,5 @@
 //ubuntu: g++ *.cpp -o main -levent -ljsoncpp -Wall
 int main(){
     PlayerServer ps;
-
     return 0;
 }

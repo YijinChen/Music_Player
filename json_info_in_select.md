@@ -31,8 +31,8 @@ server to app: {"cmd": "app_reply", "result": "suspend_success"};
 5. continue playing
 app: {"cmd": "app_continue"};
 server to client: {"cmd": "continue"};
-client: {"cmd": "reply", "result": "continue_success"};
-server to app: {"cmd": "app_reply", "result": "continue_success"};
+client: {"cmd": "reply", "result": "resume_success"};
+server to app: {"cmd": "app_reply", "result": "resume_success"};
 
 6. play prior one
 app: {"cmd": "app_prior"};
@@ -49,14 +49,14 @@ server to app: {"cmd": "app_reply", "result": "next_success", "music": "xx.mp3"}
 8. increase volume
 app: {"cmd": "app_volume_up"};
 server to client: {"cmd": "volume_up"};
-client: {"cmd": "reply", "result": "success"};
+client: {"cmd": "reply", "result": "volume_success"};
 server to app: {"cmd": "app_reply", "result": "success", "voice": "50"};
                {"cmd": "app_reply", result: off_line};
 
-9. increase volume
+9. decrease volume
 app: {"cmd": "app_volume_down"};
 server to client: {"cmd": "volume_down"};
-client: {"cmd": "reply", "result": "success"};
+client: {"cmd": "reply", "result": "volume_success"};
 server to app: {"cmd": "app_reply", "result": "success", "voice": "50"};
 
 10. sequence mode
@@ -96,7 +96,7 @@ app: {"cmd" : "app_off_line"};
 keys:
 1.start/continue
 2.stop/suspend
-3.prior
+3.previous
 4.next
 5.volume up
 6.volume down

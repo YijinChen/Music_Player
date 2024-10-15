@@ -92,7 +92,7 @@ void FindNextMusic(const char *cur, int mode, char *next){ // return the music n
     }
 }
 
-void FindPriorMusic(const char *cur, int mode, char *prior){ // return the music name
+void FindPreviousMusic(const char *cur, int mode, char *prior){ // return the music name
     if(mode == CIRCLEMODE || mode == SEQUENCEMODE){
         Node *p = head->next;
         //find the place of current music in music list
