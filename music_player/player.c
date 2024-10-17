@@ -26,7 +26,7 @@ void *g_addr = NULL; //map address for shared memory
 int g_start_flag = 0; //if the player is playing music
 int g_suspend_flag = 0; //if the player suspend
 int init_mixer_flag = 0; //if the mixer successfully initalized
-char suspend_name[64];
+//char suspend_name[64];
 
 //mixer
 snd_mixer_t *handle;
@@ -133,7 +133,8 @@ void GetMusic(){
 }
 
 void play_music(char *name, int skip_frames){
-    ShowLink();
+    g_suspend_flag = 0;
+    //ShowLink();
     pid_t control_pid = fork();
     if (control_pid == -1){
         perror("fork");
@@ -183,7 +184,7 @@ void play_music(char *name, int skip_frames){
             strcpy(music_path, MUSICPATH);
             strcat(music_path, cur_name);
 
-            printf("Play Music: %s\n", music_path);
+            printf("\nPlay Music: %s\n", music_path);
             sprintf(skip_arg, "-k %d", skip_frames);
             execl("/usr/bin/mpg123", "mpg123", "-q", skip_arg, music_path, NULL);
         }
@@ -255,7 +256,8 @@ void suspend_play(){
     shm s;
     memset(&s, 0, sizeof(s));
     memcpy(&s, g_addr, sizeof(s));
-    strcpy(suspend_name, s.cur_name);
+    //strcpy(suspend_name, s.cur_name);
+    //printf("In suspend_play, suspend_name = %s\n", suspend_name);
 
     // Attempt to suspend the subprocess
     kill(s.control_pid, SIGSTOP);
@@ -275,12 +277,15 @@ void resume_play(){
     }
     printf("Resuming music...\n");
     //read shared memory for pid    
+    char name[64] = {0};
     shm s;
     memset(&s, 0, sizeof(s));
     memcpy(&s, g_addr, sizeof(s));
+    strcpy(name, s.cur_name);
 
     // Calculate the total time in seconds that the music played before suspension
     int total_skip_seconds = difftime(suspend_time, start_time);
+    printf("total_skip_seconds = %d\n", total_skip_seconds);
 
     //continue control process
     kill(s.control_pid, SIGCONT);
@@ -288,10 +293,12 @@ void resume_play(){
     kill(s.music_pid, SIGKILL);
 
     // Convert total time into frames (approx. 38.28 frames per second)
-    double frame_rate = 38.25;
+    double frame_rate = 38.1;
     int skip_frames = (int)(total_skip_seconds * frame_rate);
+    printf("skip_frames = %d\n", skip_frames);
+    //printf("In resume_play, suspend_name = %s\n", name);
     // Start mpg123 again, skipping the calculated number of frames
-    play_music(suspend_name, skip_frames);
+    play_music(name, skip_frames);
 
     g_suspend_flag = 0;
 }
@@ -308,16 +315,16 @@ void previous_play(char *name){
 
     kill(s.control_pid, SIGKILL);//kill subprocess
     kill(s.music_pid, SIGKILL);//kill sub-subprocess
-
-    g_start_flag = 0;
+    //g_start_flag = 0;
     //char name[64] = {0};
     FindPreviousMusic(s.cur_name, s.play_mode, name);
-
     play_music(name, 0);
-    g_start_flag = 1;
+    start_time = time(NULL);
+    //g_start_flag = 1;
 }
 
 void next_play(char *name){
+    printf("next_play:");
     if(g_start_flag == 0){
         return;
     }
@@ -330,12 +337,12 @@ void next_play(char *name){
     kill(s.control_pid, SIGKILL);//kill subprocess
     kill(s.music_pid, SIGKILL);//kill sub-subprocess
 
-    g_start_flag = 0;
+    //g_start_flag = 0;
     //char name[64] = {0};
     FindNextMusic(s.cur_name, s.play_mode, name);
+    //g_start_flag = 1;
     play_music(name, 0);
-
-    g_start_flag = 1;
+    start_time = time(NULL);
 }
 
 int init_mixer(){
