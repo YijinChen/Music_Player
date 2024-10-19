@@ -30,6 +30,7 @@ void send_server(int sig){
     json_object_object_add(json, "status", json_object_new_string("alive"));
     json_object_object_add(json, "deviceid", json_object_new_string("001"));
     const char *buf = json_object_to_json_string(json);
+
     int ret = send(g_sockfd, buf, strlen(buf), 0);
     if(ret == -1){
         perror("send");
@@ -295,11 +296,13 @@ void socket_get_status(){
     json_object_object_add(json, "music", json_object_new_string(s.cur_name));
 
     const char *buf = json_object_to_json_string(json);
-    int ret = send(g_sockfd, buf, strlen(buf), 0);
-    if(ret == -1){
-        perror("send");
+    if(connect_flag == 1){
+        int ret = send(g_sockfd, buf, strlen(buf), 0);
+        if(ret == -1){
+            perror("send");
+        }
+        printf("send status to server\n");
     }
-    printf("send status to server\n");
 }
 
 void socket_get_music(){

@@ -33,7 +33,7 @@ void led_off(){
 
 void flash_led_on() {
     flash_flag = 1;  // Set the flash flag to true
-    int interval = 500; // 500 milliseconds on and off
+    int interval = 200; // 200 milliseconds on and off
 
     while (flash_flag) {
         led_on();

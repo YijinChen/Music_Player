@@ -10,6 +10,7 @@
 #include <errno.h>
 #include <unistd.h> // for sleep()
 #include <pthread.h>
+#include "main.h"
 // #include <sys/time.h>   // For struct timeval
 // #include <unistd.h>     // For close and other POSIX functions
 
@@ -62,8 +63,9 @@ void m_select(){
         ret = select(g_maxfd + 1, &tmpfd, NULL, NULL, NULL);
         if (ret == -1 && errno != EINTR){ //avoid "select: Interrupted system call"
             perror("select");
+            continue;
         }
-
+        
         if (connect_flag == 1 && FD_ISSET(g_sockfd, &tmpfd)){
             //if data is sent by tcp
             memset(message, 0, sizeof(message));
@@ -75,10 +77,23 @@ void m_select(){
             }
             else if(ret == -1){
                 perror("recv");
+                continue;
             }
             else{   //ret == 0
                 printf("connection stoped by server\n");
                 connect_flag = 0;
+                // Close and remove the socket from the FD set
+                close(g_sockfd);  // Close the socket
+                g_sockfd = -1;    // Reset socket descriptor
+                g_maxfd = g_maxfd - 1;
+                FD_CLR(g_sockfd, &readfd);
+                alarm(0); //Stop sending "keep alive", which began in connect_cb
+                //try to reconnect
+                // ret = InitSocket();
+                // if(ret == FAILURE){
+                //     printf("fail to initialize network connection");
+                // }
+                continue;
             };
 
             if(!strcmp(cmd, "start")){

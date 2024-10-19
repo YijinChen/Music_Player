@@ -1,6 +1,7 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 #include <unistd.h> //for pid_t
+#include <time.h>
 
 #define MUSICPATH "/usr/share/myir/Music/"
 #define MIXER_NAME "Headphone"
@@ -36,6 +37,8 @@ struct shm{
     pid_t ppid;
     pid_t control_pid;
     pid_t music_pid;
+    int skip_seconds;
+    time_t start_time;
 };
 typedef struct shm shm;
 //extern int iLeft;

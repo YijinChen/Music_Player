@@ -53,6 +53,7 @@ int main(){
 
     GetMusic();
     m_select();
+    printf("finished m_select()\n");
 
     return 0;
 }
