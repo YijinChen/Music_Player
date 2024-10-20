@@ -122,23 +122,17 @@ int get_key_id(){
 		{
 			switch (gpio_num)
 			{
-			case 129:
+			case 115:
 				key = 7;
 				break;
-			case 110:
+			case 116:
 				key = 8;
 				break;
-			case 115:
+			case 117:
 				key = 9;
 				break;
-			case 116:
-				key = 10;
-				break;
-			case 117:
-				key = 11;
-				break;
 			case 118:
-				key = 12;
+				key = 10;
 				break;
 			default:
 				break;

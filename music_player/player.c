@@ -183,7 +183,7 @@ void play_music(char *name, int skip_frames){
             char music_path[128] = {0};
             strcpy(music_path, MUSICPATH);
             strcat(music_path, cur_name);
-            printf("In play_music, s.start_time = %d\n", s.start_time);
+            //printf("In play_music, s.start_time = %d\n", s.start_time);
 
             printf("\nPlay Music: %s\n", music_path);
             sprintf(skip_arg, "-k %d", skip_frames);
@@ -244,6 +244,7 @@ void stop_play(){
     if(g_start_flag == 0){
         return;
     }
+    printf("Stop playing music...\n");
     
     //read shared memory for pids
     shm s;
@@ -304,7 +305,7 @@ void resume_play(){
 
     // Calculate the total time in seconds that the music played before suspension
     //int total_skip_seconds = difftime(suspend_time, start_time);
-    printf("total_skip_seconds = %d\n", s.skip_seconds);
+    //printf("total_skip_seconds = %d\n", s.skip_seconds);
 
     //continue control process
     kill(s.control_pid, SIGCONT);
@@ -314,7 +315,7 @@ void resume_play(){
     // Convert total time into frames (approx. 38.28 frames per second)
     double frame_rate = 38.1;
     int skip_frames = (int)(s.skip_seconds * frame_rate);
-    printf("skip_frames = %d\n", skip_frames);
+    //printf("skip_frames = %d\n", skip_frames);
     //printf("In resume_play, suspend_name = %s\n", name);
     //s.start_time = time(NULL);
     // Start mpg123 again, skipping the calculated number of frames
@@ -326,6 +327,7 @@ void previous_play(char *name){
     if(g_start_flag == 0){
         return;
     }
+    printf("Playing previous music...\n");
 
     //read shared memory for pids
     shm s;
@@ -342,15 +344,13 @@ void previous_play(char *name){
     play_music(name, 0);
     //start_time = time(NULL);
     g_start_flag = 1;
-        
-
 }
 
 void next_play(char *name){
-    printf("next_play:");
     if(g_start_flag == 0){
         return;
     }
+    printf("Playing next music...\n");
 
     //read shared memory for pids
     shm s;
@@ -450,6 +450,20 @@ void volume_down(){
     if (volume < 0) volume = 0;  // Limit to 0%
     set_volume(volume);  // Set volume as a percentage
     printf("Volume decreased to: %ld%%\n", volume);
+}
+
+void player_change_mode(){
+    shm s;
+    memset(&s, 0, sizeof(s));
+    memcpy(&s, g_addr, sizeof(s));
+
+    //change mode to next one
+    int mode = s.play_mode;
+    mode = (mode + 1) % (TOTALMODE + 1);
+    if(mode == 0){
+        mode = mode + 1;
+    }
+    set_mode(mode);
 }
 
 void set_mode(int mode){

@@ -25,10 +25,12 @@ void restore_terminal_settings();
 void handle_exit_signal(int signum);
 void play_music(char *name, int skip_frames);
 void mode_to_string(int mode, char* mode_name);
+void player_change_mode();
 
 #define SEQUENCEMODE    1
 #define RANDOMMODE      2
 #define CIRCLEMODE      3
+#define TOTALMODE     3
 
 //shared memory infomation
 struct shm{
@@ -46,6 +48,7 @@ extern int g_start_flag;
 extern int g_suspend_flag;
 extern void *g_addr;
 extern long current_volume;
+
 
 #endif
 

@@ -55,6 +55,10 @@ void *flash_led_thread(void *arg) {
 }
 
 void *connect_cb(void *arg){
+    if(connect_flag == 1){
+        printf("Sucessfully connected to server\n");
+        return NULL;
+    }
     int count = 5;
     pthread_t led_thread;  // Declare a thread for LED shining
 
@@ -220,7 +224,7 @@ void socket_next_play(){
 }
 
 void socket_volume_up_play(){
-    volume_up();
+    volume_up(); //the result will show on QT app as increase 5%
 
     struct json_object *json = json_object_new_object();
     json_object_object_add(json, "cmd", json_object_new_string("reply"));
@@ -237,7 +241,7 @@ void socket_volume_up_play(){
 }
 
 void socket_volume_down_play(){
-    volume_down();
+    volume_down(); //the result will show on QT app as decrease 5%
     struct json_object *json = json_object_new_object();
     json_object_object_add(json, "cmd", json_object_new_string("reply"));
     json_object_object_add(json, "result", json_object_new_string("volume_success"));

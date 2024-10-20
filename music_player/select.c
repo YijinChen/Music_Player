@@ -30,18 +30,17 @@ void parse_message(const char *m, char *c, size_t len){
 }
 
 void show(){
-    printf("start              ---- long  press [key1]\n");
-    printf("stop               ---- long  press [key2]\n");
-    printf("suspend            ---- quick press [key2]\n");
-    printf("resume             ---- quick press [key1]\n");
-    printf("previous one       ---- quick press [key3]\n");
-    printf("next one           ---- quick press [key4]\n");
-    printf("volume up          ---- quick press [key5]\n");
-    printf("volume down        ---- quick press [key6]\n");
-    printf("sequence mode      ---- long  press [key3]\n");
-    printf("random mode        ---- long  press [key4]\n");
-    printf("circle mode        ---- long  press [key5]\n");
-    printf("connect to server  ---- long  press [key6]\n");
+    printf("start                ---- quick press [key1]\n");
+    printf("stop                 ---- quick press [key2]\n");
+    printf("suspend              ---- quick press [key3]\n");
+    printf("resume               ---- quick press [key4]\n");
+    printf("volume up            ---- quick press [key5]\n");
+    printf("volume down          ---- quick press [key6]\n");
+    printf("previous one         ---- long  press [key3]\n");
+    printf("next one             ---- long  press [key4]\n");
+    printf("change playing mode: sequence/random/circle\n");
+    printf("                     ---- long  press [key5]\n");
+    printf("reconnect to server  ---- long  press [key6]\n");
 }
 
 
@@ -83,10 +82,10 @@ void m_select(){
                 printf("connection stoped by server\n");
                 connect_flag = 0;
                 // Close and remove the socket from the FD set
-                close(g_sockfd);  // Close the socket
-                g_sockfd = -1;    // Reset socket descriptor
-                g_maxfd = g_maxfd - 1;
-                FD_CLR(g_sockfd, &readfd);
+                //close(g_sockfd);  // Close the socket
+                //g_sockfd = -1;    // Reset socket descriptor
+                //g_maxfd = g_maxfd - 1;
+                //FD_CLR(g_sockfd, &readfd);
                 alarm(0); //Stop sending "keep alive", which began in connect_cb
                 //try to reconnect
                 // ret = InitSocket();
@@ -149,39 +148,33 @@ void m_select(){
             //printf("get key id: %d\n", id);
             switch(id){
                 case 1:
-                    resume_play();
+                    start_play(name);
                     break;
                 case 2: 
-                    suspend_play();
+                    stop_play();
                     break;
                 case 3: 
-                    previous_play(name);
+                    suspend_play();
                     break;
                 case 4: 
-                    next_play(name);
+                    resume_play();
                     break;
-                case 5: 
+                case 5:
                     volume_up();
                     break;
                 case 6:
                     volume_down();
                     break;
                 case 7:
-                    start_play(name);
+                    previous_play(name);
                     break;
                 case 8: 
-                    stop_play();
+                    next_play(name);
                     break;
                 case 9: 
-                    set_mode(SEQUENCEMODE);
+                    player_change_mode();
                     break;
-                case 10: 
-                    set_mode(RANDOMMODE);
-                    break;
-                case 11:
-                    set_mode(CIRCLEMODE);
-                    break;
-                case 12:
+                case 10: //reconnect network
                     //creat a thread and request the connection to server
                     ret = pthread_create(&tid, NULL, connect_cb, NULL);
                     //printf("ret: %d\n", ret);
