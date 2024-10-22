@@ -100,7 +100,7 @@ void *connect_cb(void *arg){
     }
 
     if (connect_flag == 0) {
-        printf("Failed to connect to server, please try again (long press key 6)\n");
+        printf("Failed to connect to server, please try again (long press [key6])\n");
         flash_led_off();  // Make sure to stop shining even if connection fails
         pthread_join(led_thread, NULL);  // Ensure the LED thread has stopped
     }
@@ -224,7 +224,7 @@ void socket_next_play(){
 }
 
 void socket_volume_up_play(){
-    volume_up(); //the result will show on QT app as increase 5%
+    volume_up();
 
     struct json_object *json = json_object_new_object();
     json_object_object_add(json, "cmd", json_object_new_string("reply"));
@@ -241,7 +241,8 @@ void socket_volume_up_play(){
 }
 
 void socket_volume_down_play(){
-    volume_down(); //the result will show on QT app as decrease 5%
+    volume_down();
+
     struct json_object *json = json_object_new_object();
     json_object_object_add(json, "cmd", json_object_new_string("reply"));
     json_object_object_add(json, "result", json_object_new_string("volume_success"));
@@ -305,7 +306,7 @@ void socket_get_status(){
         if(ret == -1){
             perror("send");
         }
-        printf("send status to server\n");
+        //printf("send status to server\n");
     }
 }
 

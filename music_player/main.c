@@ -10,7 +10,6 @@
 
 //arm-unknown-linux-gnueabihf-gcc *.c -o main -ljson-c -lpthread -lmpg123 -lasound
 
-
 int main(){
     int ret;
     ret = InitDriver(); // open device files
@@ -31,8 +30,7 @@ int main(){
     //     printf("Succeed to initialize network connection\n");
     // }
 
-    //initialize music list
-    ret = InitLink();
+    ret = InitLink();  //Read music from directory, initialize music list
     if(ret == FAILURE){
         printf("fail to initialize music list\n");
         exit(1);
@@ -51,6 +49,7 @@ int main(){
     //     printf("Succeed to initialize shared memory\n");
     // }
 
+    init_mixer();
     GetMusic();
     m_select();
 

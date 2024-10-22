@@ -22,13 +22,11 @@ int flash_flag = 0;
 void led_on(){
     int status = 1;
     write(g_ledfd, &status, 1);
-    //ioctl(g_ledfd, 1, which);
 }
 
 void led_off(){
     int status = 0;
     write(g_ledfd, &status, 1);
-    //ioctl(g_ledfd, 0, which);
 }
 
 void flash_led_on() {
@@ -46,7 +44,6 @@ void flash_led_on() {
 void flash_led_off() {
     flash_flag = 0;  // Stop flashing
     led_off();  // Ensure the LED is turned off
-    //printf("LED flashing stopped.\n");
 }
 
 int InitDriver(){

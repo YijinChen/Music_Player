@@ -55,7 +55,7 @@ void m_select(){
     show();
     int ret;
     char message[3072] = {0};
-    //FD_SET(0, &readfd);    // add standard input into readfd
+    //FD_SET(0, &readfd);    // for code testing, add standard input into readfd
 
     while(1){
         tmpfd = readfd;
@@ -72,36 +72,24 @@ void m_select(){
             ret = recv(g_sockfd, message, sizeof(message), 0);
             if(ret > 0){
                 parse_message(message, cmd, sizeof(cmd));
-                printf("get message from socket: %s\n", cmd);
+                //printf("get message from socket: %s\n", cmd);
             }
             else if(ret == -1){
                 perror("recv");
                 continue;
             }
             else{   //ret == 0
-                printf("connection stoped by server\n");
+                printf("Connection stoped by server\n");
                 connect_flag = 0;
-                // Close and remove the socket from the FD set
-                //close(g_sockfd);  // Close the socket
-                //g_sockfd = -1;    // Reset socket descriptor
-                //g_maxfd = g_maxfd - 1;
-                //FD_CLR(g_sockfd, &readfd);
                 alarm(0); //Stop sending "keep alive", which began in connect_cb
-                //try to reconnect
-                // ret = InitSocket();
-                // if(ret == FAILURE){
-                //     printf("fail to initialize network connection");
-                // }
                 continue;
             };
 
             if(!strcmp(cmd, "start")){
                 if(g_suspend_flag == 0){
-                    printf("Start play\n");
                     socket_start_play();
                 }
                 else{
-                    printf("Continue play\n");
                     socket_resume_play();
                 }
             }
@@ -177,7 +165,6 @@ void m_select(){
                 case 10: //reconnect network
                     //creat a thread and request the connection to server
                     ret = pthread_create(&tid, NULL, connect_cb, NULL);
-                    //printf("ret: %d\n", ret);
                     if (ret != 0){
                         printf("Failed to create connect_cb pthread\n");
                     }
