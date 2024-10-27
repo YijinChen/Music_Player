@@ -1,14 +1,30 @@
-MusicPlayer
-This project realized a music player on embedded device, which can be controlled by both hardware buttons and remote QT application. The functions of music player include: 1.start playback, 2. stop playback, 3. suspend playback, 4.resume playback, 5.previous music, 6.next music, 7.volume up, 8.volume down, 9.change mode -- sequence/random/circle. 10.connect to server
+# MusicPlayer
 
-----------------------------
-Operating environment
+This project implements a music player on an embedded device that can be controlled via hardware buttons and a remote Qt application. The music player supports the following functions:
 
-To run this project, you need a hardware developing board with Linux os (I used a board based on imx6ull), a ubuntu server (I used a Amazon cloud server, a virtial machine with ubuntu also works), and a computer with can run QT (My computer is based on MacOS, but a windows computer is also ok).
+1. Start playback
+2. Stop playback
+3. Suspend playback
+4. Resume playback
+5. Previous track
+6. Next track
+7. Volume up
+8. Volume down
+9. Change mode — sequence/random/circle
+10. Connect to server
 
+---
 
-Ubuntu Server
-1. Configure cross-compile toolchain (by libtool)
+## Operating Environment
+
+To run this project, you will need:
+- A hardware development board with a Linux OS (tested on an i.MX6ULL board)
+- An Ubuntu server (tested on Amazon Cloud, though any Ubuntu virtual machine works)
+- A macOS/Windows computer with Qt Creator installed
+
+### 1. Ubuntu Server Setup
+
+#### 1.1 Configure the Cross-Compilation Toolchain (using `libtool`)
 
 ```bash
 sudo apt install libtool-bin
@@ -23,9 +39,12 @@ ct-ng clean
 ct-ng build
 ```
 
-Note: In command "ct-ng menuconfig", you should choose the corresponding library version as developing board. You can also use buildroot instead of libtool. However, my imx6ull is equipped with a linux os with GLIBC_2.34, I cannot choose version 2.34 of glibc in buildroot. So I used libtool.
+**Note:** When using the `ct-ng menuconfig` command, ensure you select the appropriate library versions based on your development board. Alternatively, you can use **Buildroot** instead of `libtool`. However, I encountered issues with Buildroot as my i.MX6ULL board uses **GLIBC_2.34**, and Buildroot did not support this version of glibc, so I used `libtool`.
 
-2. Change user configuration to add cross-compile toolchain
+#### 1.2 Modify User Configuration to Add Cross-Compilation Toolchain
+
+Add the cross-compiler to your environment:
+
 ```bash
 vim ~/.bashrc
 export ARCH=arm
@@ -34,25 +53,32 @@ export PATH=CROSS_COMPILE_PATH:$PATH
 source ~/.bashrc
 ```
 
-Replace CROSS_COMPILE_TOOLCHAIN as the name of your cross-compile toolchain, and replace CROSS_COMPILE_PATH as the directory of cross-compile toolchain on your ubuntu.
+Replace:
+- **`CROSS_COMPILE_TOOLCHAIN`** with the name of your cross-compile toolchain.
+- **`CROSS_COMPILE_PATH`** with the directory of the cross-compile toolchain.
 
-Example:
+**Example:**
+
 ```bash
-vim ~/.bashrc 
+vim ~/.bashrc
 export ARCH=arm
 export CROSS_COMPILE=arm-unknown-linux-gnueabihf-
 export PATH=$HOME/x-tools/arm-unknown-linux-gnueabihf/bin:$PATH
 source ~/.bashrc
 ```
 
-Test cross-compile toolchain:
+#### 1.3 Test the Cross-Compile Toolchain
+
+Verify that the cross-compilation toolchain is properly configured by running:
+
 ```bash
 arm-unknown-linux-gnueabihf-gcc -v
 ```
 
-3. Compile Linux Kernel
+#### 1.4 Compile the Linux Kernel
 
-download the Linux Kernel corresponding to the Linux version on your developing board, for me, it is Linux-4.9.88.
+Download the Linux Kernel that corresponds to the version running on your development board. For example, if you're using Linux 4.9.88:
+
 ```bash
 make mrproper
 make imx_v7_defconfig
@@ -61,11 +87,14 @@ make dtbs
 make modules
 ```
 
-Linux Developing Board
-The Developing Board should connect to Internet to receive packages from ubuntu.
+### 2. Embedded Linux Development Board (i.MX6ULL)
 
-1. Cross-compile json-c
-Download json-c-json-c-0.13.zip from github
+Your development board must be connected to the Internet to receive packages from the Ubuntu server.
+
+#### 2.1 Cross-Compile `json-c`
+
+1. Download `json-c` from GitHub:
+
 ```bash
 unzip json-c-json-c-0.13.zip
 cd json-c-json-c-0.13/
@@ -74,48 +103,166 @@ make
 sudo PATH=$PATH make install
 ```
 
-2. Cross-compile alsa-lib
+#### 2.2 Cross-Compile `alsa-lib`
 
-Download alsa-lib-xxxx.tar from website on ubuntu, decompressed it and configure it:
+1. Download `alsa-lib` from the website, extract it, and configure:
+
 ```bash
-wget xxxx
-tar - vxjf alsa-lib-xxx.tar.bz2
-cd alsa-lib-xxx.tar.bz2
+wget http://www.alsa-project.org/files/pub/lib/alsa-lib-xxx.tar.bz2
+tar -vxjf alsa-lib-xxx.tar.bz2
+cd alsa-lib-xxx
 
 ./configure --host=arm-unknown-linux-gnueabihf --prefix=/usr/lib/alsa-lib
 PATH=$PATH:/home/ubuntu/x-tools/arm-unknown-linux-gnueabihf/bin make
 sudo -E PATH=$PATH:/home/ubuntu/x-tools/arm-unknown-linux-gnueabihf/bin make install
 ```
-Copy the installed alsa-lib to imx6ull with scp
+
+2. Transfer the compiled library to the i.MX6ULL using `scp`:
+
 ```bash
-scp -i -r ubuntu@xxx:/usr/lib/alsa-lib /usr/lib/alsa-lib
-scp -i -r ubuntu@xxx:/usr/share/alsa /usr/share/alsa
+scp -i -r ubuntu@<IP_ADDRESS>:/usr/lib/alsa-lib /usr/lib/alsa-lib
+scp -i -r ubuntu@<IP_ADDRESS>:/usr/share/alsa /usr/share/alsa
 ```
 
-3. Cross-compile alsa-utils
+#### 2.3 Cross-Compile `alsa-utils`
+
+1. Download and configure `alsa-utils`:
 
 ```bash
-wget xxxx
-tar - vxjf alsa-utils-xxx.tar.bz2
-cd alsa-utils-xxx/
+wget http://www.alsa-project.org/files/pub/utils/alsa-utils-xxx.tar.bz2
+tar -vxjf alsa-utils-xxx.tar.bz2
+cd alsa-utils-xxx
 
-./configure --host=arm-unknown-linux-gnueabihf --prefix=/usr/lib/alsa-utils —-with-alsa-inc-prefix=/usr/lib/alsa-lib/include --with-alsa-prefix=/usr/lib/alsa-lib/lib
+./configure --host=arm-unknown-linux-gnueabihf --prefix=/usr/lib/alsa-utils --with-alsa-inc-prefix=/usr/lib/alsa-lib/include --with-alsa-prefix=/usr/lib/alsa-lib/lib
 make
 make install
 ```
-Copy the installed alsa-lib to imx6ull with scp
+
+2. Transfer the compiled files to the i.MX6ULL:
 
 ```bash
-scp -i ubuntu@xxx:/usr/lib/alsa-utils/bin/* /bin
-scp -i ubuntu@xxx:/usr/lib/alsa-utils/sbin/* /sbin
-scp -i ubuntu@xxx:/usr/lib/alsa-utils/share/alsa /usr/share
+scp -i ubuntu@<IP_ADDRESS>:/usr/lib/alsa-utils/bin/* /bin
+scp -i ubuntu@<IP_ADDRESS>:/usr/lib/alsa-utils/sbin/* /sbin
+scp -i ubuntu@<IP_ADDRESS>:/usr/lib/alsa-utils/share/alsa /usr/share
 ```
 
-4. cross-compile mpg123
+#### 2.4 Cross-Compile `mpg123`
+
+1. Download and compile `mpg123`:
 
 ```bash
+wget https://www.mpg123.de/download/mpg123-x.xx.x.tar.bz2
+tar -vxjf mpg123-x.xx.x.tar.bz2
+cd mpg123-x.xx.x
+
 ./configure --host=arm-unknown-linux-gnueabihf --prefix=/home/ubuntu/x-tools/arm-unknown-linux-gnueabihf/arm-unknown-linux-gnueabihf --with-audio=alsa
+make
+make install
 ```
+
+### 3. Personal Computer
+
+1. Install **Qt Creator** on your macOS or Windows computer.
+2. Set up the remote connection and project settings as needed to control the music player remotely.
+
+
+---
+
+## Hardware Driver Installation
+
+### 1. Cross-Compile Driver Programs on Ubuntu
+
+Compile the button and LED drivers on your Ubuntu server:
+
+```bash
+cd ../Music_Player/music_player/button_driver
+make
+
+cd ../Music_Player/music_player/led_driver
+make
+```
+
+### 2. Transfer the Compiled Driver Files to the i.MX6ULL
+
+Use `scp` to transfer the compiled driver files to your i.MX6ULL development board.
+
+On the **development board**, run the following commands to copy files from the Ubuntu server:
+
+```bash
+scp -i ubuntu@<IP_ADDRESS>:../Music_Player/music_player/button_driver/gpio_key_drv.ko /root/music_player
+scp -i ubuntu@<IP_ADDRESS>:../Music_Player/music_player/button_driver/button_test /root/music_player
+scp -i ubuntu@<IP_ADDRESS>:../Music_Player/music_player/led_driver/led_drv.ko /root/music_player
+scp -i ubuntu@<IP_ADDRESS>:../Music_Player/music_player/led_driver/ledtest /root/music_player
+```
+
+### 3. Install LED and Button Drivers on the i.MX6ULL
+
+On the development board, install the drivers by running the following commands:
+
+```bash
+cd /root/music_player
+insmod gpio_key_drv.ko
+insmod led_drv.ko
+```
+
+### 4. Test Installed Drivers
+
+To verify the LED and button drivers, execute the following commands:
+
+```bash
+cd /root/music_player
+./ledtest /dev/myled on
+./ledtest /dev/myled off
+./button_test /dev/100ask_button0
+```
+
+---
+
+## Project Execution
+
+### 1. Compile Programs on Ubuntu
+
+- **Compile the `music_server` program on Ubuntu**:
+    ```bash
+    cd ../Music_Player/music_server
+    g++ *.cpp -o main -levent -ljsoncpp -Wall
+    ```
+
+- **Cross-compile the `music_player` program for the i.MX6ULL**:
+    ```bash
+    cd ../Music_Player/music_player
+    arm-unknown-linux-gnueabihf-gcc *.c -o main -ljson-c -lpthread -lmpg123 -lasound
+    ```
+
+### 2. Transfer the Compiled `music_player` Program to the i.MX6ULL
+
+On the **i.MX6ULL** development board, transfer the compiled `music_player` binary:
+
+```bash
+scp -i ubuntu@<IP_ADDRESS>:../Music_Player/music_player/main /root/music_player
+```
+
+### 3. Run Programs on Ubuntu, i.MX6ULL, and Qt Creator
+
+- **On Ubuntu** (run the music server):
+    ```bash
+    cd ../Music_Player/music_server
+    ./main
+    ```
+
+- **On i.MX6ULL** (run the music player):
+    ```bash
+    cd /root/music_player
+    ./main
+    ```
+
+- **On Qt Creator**:
+    Open and execute the program located in `/Music_Player/music_app`.
+
+---
+
+
+
 
 
 
